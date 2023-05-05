@@ -1,8 +1,10 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { NextReactP5Wrapper } from "@p5-wrapper/next";
 
 export default function Preview({ previewObjects }) {
   const sketchRef = useRef("");
+  // Hacky way to trigger rerender
+  const [index, setIndex] = useState(0);
 
   useEffect(() => {
     if (!previewObjects) return;
@@ -32,7 +34,7 @@ export default function Preview({ previewObjects }) {
             p.sphere(unit);
           } else if (obj.shape === "Cylinder") {
             p.cylinder(unit);
-          } else if (obj.shape === "Circular Cone") {
+          } else if (obj.shape === "Cone") {
             p.cone(unit);
           } else if (obj.shape === "Triangle Pyramid") {
             p.cone(unit, unit, 4);
@@ -50,7 +52,7 @@ export default function Preview({ previewObjects }) {
       };
 
       p.draw = () => {
-        p.background(200);
+        p.background(0);
         p.ambientLight(100);
         p.pointLight(255, 255, 255, 0, 0, 300);
 
@@ -68,7 +70,14 @@ export default function Preview({ previewObjects }) {
     };
 
     sketchRef.current = sketch;
+    setIndex(index + 1);
   }, [previewObjects]);
 
-  return <NextReactP5Wrapper sketch={sketchRef.current} />;
+  return (
+    <NextReactP5Wrapper
+      sketch={sketchRef.current}
+      index={index}
+      className="w-full h-full"
+    />
+  );
 }
