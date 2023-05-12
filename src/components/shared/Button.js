@@ -1,12 +1,13 @@
 import React from "react";
 
-const Button = ({ children, onClick, disabled, ...props }) => {
+const Button = ({ children, onClick, disabled, className, ...props }) => {
   const disabledStyle = "bg-gray-300 text-gray-500 cursor-not-allowed";
+  const normalStyle = "bg-lime-800 hover:bg-lime-600 cursor-pointer";
   return (
     <button
-      className={`bg-lime-800 text-white text-base py-1 px-2.5 border-none cursor-pointer text-sm rounded-md mr-2.5 hover:bg-lime-600 focus:outline-none ${
-        disabled ? disabledStyle : ""
-      }`}
+      className={`text-white text-base py-2 px-2.5 border-none text-sm rounded-md mr-2.5 focus:outline-none ${
+        disabled ? disabledStyle : normalStyle
+      } ${className}`}
       onClick={onClick}
       disabled={disabled}
       {...props}

@@ -1,22 +1,27 @@
-import Preview from "./Preview";
-import CreationList from "./CreationList";
-import TopBar from "./TopBar";
-
-import { useState } from "react";
+import Preview from "@/components/Preview";
+import CreationList from "@/components/CreationList";
+import PromptBar from "@/components/PromptBar";
+import { useEffect, useState } from "react";
+import ActionBar from "@/components/ActionBar";
+import CreationData from "@/models/CreationData";
 
 export default function Dashboard() {
-  const [creation, setCreation] = useState(null);
+  const [creation, setCreation] = useState(new CreationData());
   const [preview, setPreview] = useState([]);
-  const [reloadCreations, setReloadCreations] = useState(0);
+  const [refreshPreview, setRefreshPreview] = useState(false);
+  const [refreshCreations, setRefreshCreations] = useState(true);
+
+  useEffect(() => {
+    if (refreshPreview) {
+      showPreview();
+      setRefreshPreview(false);
+    }
+  }, [refreshPreview]);
 
   async function saveCreation() {
-    if (!creation?.title) {
-      alert("Please enter a title for your creation.");
-      return;
-    }
-    if (!creation?.content) {
-      alert("Please generate a 3d model creation first.");
-      return;
+    const { errors } = creation.validate();
+    if (errors.length > 0) {
+      return alert(errors.join("\n"));
     }
     try {
       const response = await fetch("/api/creations", {
@@ -27,46 +32,63 @@ export default function Dashboard() {
         body: JSON.stringify({
           title: creation.title,
           content: creation.content,
+          chatThread: creation.threadId,
         }),
       });
-      setReloadCreations(reloadCreations + 1);
+      const data = (await response.json()).data;
+      setCreation(
+        new CreationData(
+          data.title,
+          data.content,
+          data.chatThread,
+          creation.refinesLeft,
+          data._id
+        )
+      );
+      setRefreshCreations(true);
     } catch (error) {
       console.error("Error parsing the input string:", error);
       alert("invalid data");
     }
   }
 
-  function reset() {
-    updateCreation({ content: null, _id: null });
-    setPreview([]);
-  }
-
   function showPreview() {
-    if (creation?.content) {
-      try {
-        const jsonString = creation.content
-          .replace(/(\w+)\s*:/g, '"$1":')
-          .replace(/},\s*]/g, "}]");
-        setPreview(JSON.parse(jsonString));
-      } catch (error) {
-        console.error("Error parsing the input string:", error);
-        alert("invalid data");
-      }
-    } else {
-      alert("Please generate a 3d model creation first.");
+    try {
+      const jsonString = creation.contentToJson();
+      setPreview(jsonString ? JSON.parse(jsonString) : []);
+    } catch (error) {
+      console.error("Error parsing the input string:", error);
+      alert("invalid data");
     }
   }
 
-  function handleCreationSelected(selectedCreation) {
-    setCreation(selectedCreation);
+  function onPromptChange(event) {
+    setCreation(
+      new CreationData(
+        event.target.value,
+        creation.content,
+        creation.threadId,
+        creation.refinesLeft,
+        creation.id
+      )
+    );
   }
 
-  function handleCreationContentChanged(event) {
-    updateCreation({ content: event.target.value });
+  function onContentChange(event) {
+    setCreation(
+      new CreationData(
+        creation.title,
+        event.target.value,
+        creation.threadId,
+        creation.refinesLeft,
+        creation.id
+      )
+    );
   }
 
-  function updateCreation(properties) {
-    setCreation((prevState) => ({ ...prevState, ...properties }));
+  function setCreationAndRefreshView(creation) {
+    setCreation(creation);
+    setRefreshPreview(true);
   }
 
   return (
@@ -75,29 +97,35 @@ export default function Dashboard() {
         <div className="absolute w-1/4 h-full bg-amber-600">
           <div className="border-b border-neutral-300 bg-rose-500 h-14">
             <img className="h-full inline-block" src="/logo.png" alt="logo" />
-            <div className="pl-2 pt-2 font-extrabold text-white text-lg hidden lg:inline-block">
-              MM Labs
+            <div className="pl-1 align-middle font-extrabold text-white text-lg hidden lg:inline-block">
+              3dGenie
             </div>
           </div>
-          <CreationList
-            reload={reloadCreations}
-            selectedCreationId={creation?._id}
-            onCreationSelected={handleCreationSelected}
-          />
+          <div className="h-[calc(100%-3.5rem)] overflow-scroll">
+            <CreationList
+              refresh={refreshCreations}
+              selectedCreationId={creation.id}
+              onCreationSelected={setCreationAndRefreshView}
+              onRefreshComplete={() => setRefreshCreations(false)}
+            />
+          </div>
         </div>
         <div className="absolute left-1/4 w-3/4 h-full">
-          <TopBar
-            creation={creation}
-            reset={reset}
-            showPreview={showPreview}
-            saveCreation={saveCreation}
-            updateCreation={updateCreation}
+          <PromptBar
+            prompt={creation.title}
+            onPromptChange={onPromptChange}
+            onCreationChange={setCreationAndRefreshView}
           />
           <textarea
-            className="w-full h-[calc(100%-3.5rem)] absolute top-[3.5rem] bottom-0 box-border p-2.5"
-            id="editor"
-            value={creation?.content || ""}
-            onChange={handleCreationContentChanged}
+            className="w-full h-[calc(100%-7rem)] absolute top-[3.5rem] bottom-0 box-border p-2.5"
+            value={creation.content || ""}
+            onChange={onContentChange}
+          />
+          <ActionBar
+            creation={creation}
+            onCreationChange={setCreationAndRefreshView}
+            showPreview={showPreview}
+            saveCreation={saveCreation}
           />
         </div>
       </div>

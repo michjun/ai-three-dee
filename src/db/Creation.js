@@ -1,5 +1,4 @@
 import mongoose from "mongoose";
-import ChatMessageSchema from "./ChatMessage";
 
 const CreationSchema = new mongoose.Schema({
   title: {
@@ -12,7 +11,17 @@ const CreationSchema = new mongoose.Schema({
     required: true,
     trim: true,
   },
-  messages: [ChatMessageSchema],
+  aiModel: {
+    type: String,
+    required: true,
+    default: "gpt4",
+    trim: true,
+    index: true,
+  },
+  chatThread: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "chatThread",
+  },
 });
 
 const Creation =

@@ -1,9 +1,7 @@
-import { Configuration, OpenAIApi } from "openai";
-
-const configuration = new Configuration({
-  apiKey: process.env.OPENAI_API_KEY,
-});
-const openai = new OpenAIApi(configuration);
+import { connectToDb } from "@/lib/mongoose";
+import ChatThread from "@/db/ChatThread";
+import { getOpenai } from "@/lib/openai";
+import { maxRefineCount } from "@/lib/constants";
 
 const systemPrompt = `
 Given the following list of shapes, return an array of shapes that resembles the target object.
@@ -21,8 +19,10 @@ Return only the result using the format below, do not include any extra text:
 
 Rotation are specified in radians.
 Use the exact shape names above.
+If user prompt is unrelated to the target object, return the previous array.
 `;
 
+// TODO: store examples in database
 const examples = [
   {
     prompt: "UFO",
@@ -53,20 +53,10 @@ const examples = [
 ];
 
 function generatePrompt(model) {
-  return `Return results for object: ${model}.`;
+  return `Return result for object: ${model}.`;
 }
 
 export default async function (req, res) {
-  if (!configuration.apiKey) {
-    res.status(500).json({
-      error: {
-        message:
-          "OpenAI API key not configured, please follow instructions in README.md",
-      },
-    });
-    return;
-  }
-
   const creationDescription = req.body.creationDescription || "";
   if (creationDescription.trim().length === 0) {
     res.status(400).json({
@@ -77,58 +67,42 @@ export default async function (req, res) {
     return;
   }
 
-  const messages = [{ role: "system", content: systemPrompt }]
-    .concat(
-      examples
-        .map((example) => [
-          { role: "user", content: generatePrompt(example.prompt) },
-          { role: "assistant", content: example.response },
-        ])
-        .flat()
-    )
-    .concat([{ role: "user", content: generatePrompt(creationDescription) }]);
+  const messages = [{ role: "system", content: systemPrompt }].concat(
+    examples
+      .map((example) => [
+        { role: "user", content: generatePrompt(example.prompt) },
+        { role: "assistant", content: example.response },
+      ])
+      .flat()
+  );
+  messages.push({ role: "user", content: generatePrompt(creationDescription) });
 
   try {
+    const { openai } = getOpenai();
     const completion = await openai.createChatCompletion({
       model: "gpt-4",
       messages: messages,
     });
-    console.log(completion.data);
     const result = completion.data.choices[0].message;
-    res.status(200).json({ result: result });
+    messages.push(result);
+    await connectToDb();
+    const thread = await ChatThread.create({
+      title: creationDescription,
+      messages: messages,
+      exampleCount: examples.length,
+      refineCount: 0,
+    });
+    res.status(200).json({
+      result: result,
+      threadId: thread._id,
+      refinesLeft: maxRefineCount - thread.refineCount,
+    });
   } catch (error) {
-    // Consider adjusting the error handling logic for your use case
-    if (error.response) {
-      console.error(error.response.status, error.response.data);
-      res.status(error.response.status).json(error.response.data);
-    } else {
-      console.error(`Error with OpenAI API request: ${error.message}`);
-      res.status(500).json({
-        error: {
-          message: "An error occurred during your request.",
-        },
-      });
-    }
+    console.error(`Error with OpenAI API request: ${error.message}`);
+    res.status(500).json({
+      error: {
+        message: "An error occurred during your request.",
+      },
+    });
   }
-}
-
-function generateSimplePrompt(model) {
-  return `
-Available shapes:
-- Cube
-- Ball
-  
-Rotation are specified in radians.
-Return an array of shapes that roughly resembles ${model} using the shapes. 
-Return the result array without any extra text. 
-  
-Example Result for "Car":
-[
-  {shape: "Cube", position: {x: 0, y: 0, z: 0}, rotation: {x: 0, y: 0, z: 0}, scale: {x: 4.5, y: 1, z: 1.5}, name: "Body"},
-  {shape: "Cube", position: {x: 0, y: 0.8, z: 0}, rotation: {x: 0, y: 0, z: 0}, scale: {x: 2.5, y: 0.8, z: 1}, name: "Top"},
-  {shape: "Ball", position: {x: -1.25, y: -0.5, z: 0.75}, rotation: {x: 1.58, y: 0, z: 0}, scale: {x: 0.5, y: 0.5, z: 0.5}, name: "Front Left Wheel"},
-  {shape: "Ball", position: {x: -1.25, y: -0.5, z: -0.75}, rotation: {x: 1.58, y: 0, z: 0}, scale: {x: 0.5, y: 0.5, z: 0.5}, name: "Front Right Wheel"},
-  {shape: "Ball", position: {x: 1.25, y: -0.5, z: 0.75}, rotation: {x: 1.58, y: 0, z: 0}, scale: {x: 0.5, y: 0.5, z: 0.5}, name: "Back Left Wheel"},
-  {shape: "Ball", position: {x: 1.25, y: -0.5, z: -0.75}, rotation: {x: 1.58, y: 0, z: 0}, scale: {x: 0.5, y: 0.5, z: 0.5}, name: "Back Right Wheel"}
-]`;
 }

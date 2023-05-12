@@ -8,9 +8,22 @@ export default function Preview({ previewObjects }) {
 
   useEffect(() => {
     if (!previewObjects) return;
+
+    let maxScale = 0;
+    let maxY = 0;
+    let minY = 0;
+    previewObjects.forEach((item) => {
+      const { x: sx, y: sy, z: sz } = item.scale;
+      const { x: px, y: py, z: pz } = item.position;
+      maxScale = Math.max(maxScale, sx, sy, sz, px, py, pz);
+      maxY = Math.max(maxY, py);
+      minY = Math.min(minY, py);
+    });
+
     // Create a new p5.js sketch function using the provided code
     const sketch = (p) => {
-      let unit = 100;
+      let canvasSize = 800;
+      let unit = maxScale > 5 ? (0.4 * canvasSize) / maxScale : 100;
       let angleY = 0;
       let angleX = 0;
 
@@ -48,7 +61,7 @@ export default function Preview({ previewObjects }) {
       };
 
       p.setup = () => {
-        p.createCanvas(800, 800, p.WEBGL);
+        p.createCanvas(canvasSize, canvasSize, p.WEBGL);
       };
 
       p.draw = () => {
@@ -59,6 +72,7 @@ export default function Preview({ previewObjects }) {
         p.push();
         p.rotateY(angleY);
         p.rotateX(angleX);
+        p.translate(0, ((maxY + minY) * unit) / 2, 0);
         p.noStroke();
 
         drawObjects(previewObjects);

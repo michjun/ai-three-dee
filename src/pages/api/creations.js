@@ -1,10 +1,10 @@
-import { connectToDb } from "../../lib/mongoose";
-import Creation from "../../models/Creation";
+import { connectToDb } from "@/lib/mongoose";
+import Creation from "src/db/Creation";
 
 export default async function (req, res) {
+  await connectToDb();
   if (req.method === "GET") {
     try {
-      await connectToDb();
       const creations = await Creation.find({});
       res.status(200).json({ success: true, data: creations });
     } catch (error) {
@@ -16,7 +16,7 @@ export default async function (req, res) {
     }
   } else if (req.method === "POST") {
     try {
-      await connectToDb();
+      console.log(req.body);
       const creation = await Creation.create(req.body);
       res.status(200).json({ success: true, data: creation });
     } catch (error) {

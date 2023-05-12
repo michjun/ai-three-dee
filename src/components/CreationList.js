@@ -1,22 +1,40 @@
 import { useState, useEffect } from "react";
+import CreationData from "@/models/CreationData";
 
 export default function CreationList({
-  reload,
+  refresh,
   selectedCreationId,
   onCreationSelected,
+  onRefreshComplete,
 }) {
   const [creations, setCreations] = useState([]);
-  const selectedStyle = "bg-gray-600";
+  const selectedStyle = "bg-amber-500";
 
   useEffect(() => {
-    const fetchData = async () => {
-      const response = await fetch("/api/creations");
-      const data = (await response.json()).data;
-      setCreations(data.reverse());
-    };
+    if (refresh) {
+      const fetchData = async () => {
+        const response = await fetch("/api/creations");
+        const data = (await response.json()).data;
+        setCreations(
+          data
+            .reverse()
+            .map(
+              (creation) =>
+                new CreationData(
+                  creation.title,
+                  creation.content,
+                  creation.chatThread,
+                  0,
+                  creation._id
+                )
+            )
+        );
+        onRefreshComplete();
+      };
 
-    fetchData();
-  }, [reload]);
+      fetchData();
+    }
+  }, [refresh]);
 
   function onCreationClick(event, creation) {
     event.preventDefault();
@@ -27,9 +45,9 @@ export default function CreationList({
     <ul className="list-none m-0 p-0">
       {creations.map((creation) => (
         <li
-          key={creation._id}
+          key={creation.id}
           className={`text-white cursor-pointer border-b border-neutral-300 ${
-            creation._id === selectedCreationId ? selectedStyle : ""
+            creation.id === selectedCreationId ? selectedStyle : ""
           }`}
         >
           <a
