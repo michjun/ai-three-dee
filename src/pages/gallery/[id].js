@@ -1,7 +1,9 @@
 import Head from "next/head";
-import Dashboard from "@/components/Dashboard";
+import Gallery from "@/components/Gallery";
+import { useRouter } from "next/router";
 
 export default function Home() {
+  const router = useRouter();
   const bgStyle = { backgroundImage: `url('/magic3.png')` };
   return (
     <div style={bgStyle}>
@@ -9,7 +11,7 @@ export default function Home() {
         <title>Text to 3D with Primitive Shapes</title>
         <link rel="icon" href="/genie2.png" />
       </Head>
-      <Dashboard />
+      <Gallery creationId={router.query.id} />
     </div>
   );
 }

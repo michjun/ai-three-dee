@@ -3,12 +3,11 @@ import CreationData from "@/models/CreationData";
 
 export default function CreationList({
   refresh,
-  selectedCreationId,
-  onCreationSelected,
+  getCreationItem,
   onRefreshComplete,
+  className,
 }) {
   const [creations, setCreations] = useState([]);
-  const selectedStyle = "bg-amber-500";
 
   useEffect(() => {
     if (refresh) {
@@ -29,35 +28,18 @@ export default function CreationList({
                 )
             )
         );
-        onRefreshComplete();
+        if (onRefreshComplete) {
+          onRefreshComplete();
+        }
       };
 
       fetchData();
     }
   }, [refresh]);
 
-  function onCreationClick(event, creation) {
-    event.preventDefault();
-    onCreationSelected(creation);
-  }
-
   return (
-    <ul className="list-none m-0 p-0">
-      {creations.map((creation) => (
-        <li
-          key={creation.id}
-          className={`text-white cursor-pointer border-b border-neutral-300 ${
-            creation.id === selectedCreationId ? selectedStyle : ""
-          }`}
-        >
-          <a
-            className="block w-full p-2.5"
-            onClick={(e) => onCreationClick(e, creation)}
-          >
-            {creation.title}
-          </a>
-        </li>
-      ))}
+    <ul className={`list-none m-0 p-0 ${className}`}>
+      {creations.map((creation) => getCreationItem(creation))}
     </ul>
   );
 }

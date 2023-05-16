@@ -1,24 +1,23 @@
-import { useState } from "react";
 import Button from "@/components/shared/Button";
 import CreationData from "@/models/CreationData";
 
 export default function PromptBar({
   prompt,
   onPromptChange,
+  hasUnsavedChanges,
   onCreationChange,
+  className,
 }) {
-  const [submitting, setSubmitting] = useState(false);
-
   async function onSubmit(event) {
-    event.preventDefault();
-    if (submitting) {
-      return;
-    }
     if (!prompt) {
-      alert("Please enter a prompt.");
+      alert("Please enter your wish to the Genie.");
       return;
     }
-    setSubmitting(true);
+    if (hasUnsavedChanges) {
+      if (!confirm("Are you sure you want to start a new spell?")) {
+        return;
+      }
+    }
     onCreationChange(new CreationData(prompt));
 
     try {
@@ -51,21 +50,27 @@ export default function PromptBar({
       console.error(error);
       alert(error.message);
     }
-    setSubmitting(false);
   }
 
   return (
-    <div className="h-14 bg-lime-500 border flex items-center pl-2.5 box-border">
-      <form onSubmit={onSubmit} className="flex w-full">
+    <div
+      className={`h-14 border flex items-center pl-2.5 box-border ${className}`}
+    >
+      <form className="flex w-full">
         <input
           className="p-1.5 mr-2 flex-grow"
           type="text"
           value={prompt || ""}
-          placeholder="Genie, please create a 3D model of a..."
+          placeholder="Genie, grant me a stunning 3D model of a..."
           onChange={onPromptChange}
         />
-        <Button type="submit" disabled={submitting}>
-          {submitting ? "Thinking..." : "Let's Go!"}
+        <Button
+          disabled={!prompt}
+          className="mr-2.5"
+          onClick={onSubmit}
+          loadingText={"Producing Spell..."}
+        >
+          Send My Wish
         </Button>
       </form>
     </div>

@@ -1,18 +1,11 @@
-import { useState, useRef } from "react";
+import { useRef } from "react";
 import Button from "@/components/shared/Button";
 import CreationData from "@/models/CreationData";
 
 export default function RefineForm({ creation, onCreationChange, onComplete }) {
   const promptInput = useRef();
-  const [submitting, setSubmitting] = useState(false);
 
-  async function onSubmit(event) {
-    event.preventDefault();
-    if (submitting) {
-      return;
-    }
-    setSubmitting(true);
-
+  async function onSubmit() {
     try {
       const response = await fetch("/api/refine", {
         method: "POST",
@@ -39,8 +32,7 @@ export default function RefineForm({ creation, onCreationChange, onComplete }) {
           creation.title,
           content.slice(content.indexOf("[")),
           data.threadId,
-          data.refinesLeft,
-          creation.id
+          data.refinesLeft
         )
       );
       onComplete();
@@ -48,21 +40,25 @@ export default function RefineForm({ creation, onCreationChange, onComplete }) {
       console.error(error);
       alert(error.message);
     }
-    setSubmitting(false);
   }
 
   return (
-    <form onSubmit={onSubmit} className="w-full p-2">
-      <strong>Genie:</strong> I hear you. You still have {creation.refinesLeft}{" "}
-      wishes. What would you like to change about {creation.title}?
+    <form className="w-full p-2">
+      <strong>Genie:</strong> I have heard your words. {creation.refinesLeft}{" "}
+      wishes yet remain for you. Now, tell me, what transformation do you desire
+      for the humble {creation.title}?
       <textarea
         className="p-1.5 mr-4 mt-4 mb-4 h-20 w-full border border-neutral-300 rounded"
         type="text"
         ref={promptInput}
       />
       <div className="flex justify-end w-full">
-        <Button type="submit" disabled={submitting} className="mr-0">
-          {submitting ? "Thinking..." : "Make a wish"}
+        <Button
+          onClick={onSubmit}
+          loadingText="Producing Spell..."
+          className="mr-0"
+        >
+          Send My Wish
         </Button>
       </div>
     </form>

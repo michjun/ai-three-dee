@@ -1,15 +1,14 @@
 import Head from "next/head";
-import Dashboard from "@/components/Dashboard";
+import AdvancedDashboard from "@/components/AdvancedDashboard";
 
 export default function Home() {
-  const bgStyle = { backgroundImage: `url('/magic3.png')` };
   return (
-    <div style={bgStyle}>
+    <div>
       <Head>
         <title>Text to 3D with Primitive Shapes</title>
         <link rel="icon" href="/genie2.png" />
       </Head>
-      <Dashboard />
+      <AdvancedDashboard />
     </div>
   );
 }

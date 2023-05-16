@@ -1,15 +1,15 @@
 import Preview from "@/components/Preview";
-import CreationList from "@/components/CreationList";
 import PromptBar from "@/components/PromptBar";
 import { useEffect, useState } from "react";
-import ActionBar from "@/components/ActionBar";
+import ActionBar, { availableActions } from "@/components/ActionBar";
 import CreationData from "@/models/CreationData";
+import { data } from "autoprefixer";
 
 export default function Dashboard() {
   const [creation, setCreation] = useState(new CreationData());
   const [preview, setPreview] = useState([]);
+  const [contentSaved, setContentSaved] = useState(true);
   const [refreshPreview, setRefreshPreview] = useState(false);
-  const [refreshCreations, setRefreshCreations] = useState(true);
 
   useEffect(() => {
     if (refreshPreview) {
@@ -45,10 +45,26 @@ export default function Dashboard() {
           data._id
         )
       );
-      setRefreshCreations(true);
+      setContentSaved(true);
+      return data._id;
     } catch (error) {
       console.error("Error parsing the input string:", error);
-      alert("invalid data");
+      alert("Sorry, something is wrong");
+    }
+  }
+
+  async function shareCreation() {
+    let creationId = creation.id;
+    if (!creationId || !contentSaved) {
+      creationId = await saveCreation();
+    }
+    if (creationId) {
+      await navigator.clipboard.writeText(
+        `${process.env.NEXT_PUBLIC_HOST_URL}/gallery/${creationId}`
+      );
+      alert("Share link copied to clipboard!");
+    } else {
+      alert("Sorry, something is wrong");
     }
   }
 
@@ -58,7 +74,9 @@ export default function Dashboard() {
       setPreview(jsonString ? JSON.parse(jsonString) : []);
     } catch (error) {
       console.error("Error parsing the input string:", error);
-      alert("invalid data");
+      alert(
+        "Genie: Sorry, I am currently having a mental breakdown. Please try again later."
+      );
     }
   }
 
@@ -74,63 +92,43 @@ export default function Dashboard() {
     );
   }
 
-  function onContentChange(event) {
-    setCreation(
-      new CreationData(
-        creation.title,
-        event.target.value,
-        creation.threadId,
-        creation.refinesLeft,
-        creation.id
-      )
-    );
-  }
-
   function setCreationAndRefreshView(creation) {
     setCreation(creation);
     setRefreshPreview(true);
+    if (creation.id) {
+      setContentSaved(true);
+    } else {
+      setContentSaved(false);
+    }
   }
 
   return (
-    <div>
-      <div className="absolute inset-y-0 w-1/2 font-mono">
-        <div className="absolute w-1/4 h-full bg-amber-600">
-          <div className="border-b border-neutral-300 bg-rose-500 h-14">
-            <img className="h-full inline-block" src="/logo.png" alt="logo" />
-            <div className="pl-1 align-middle font-extrabold text-white text-lg hidden lg:inline-block">
-              3dGenie
-            </div>
-          </div>
-          <div className="h-[calc(100%-3.5rem)] overflow-scroll">
-            <CreationList
-              refresh={refreshCreations}
-              selectedCreationId={creation.id}
-              onCreationSelected={setCreationAndRefreshView}
-              onRefreshComplete={() => setRefreshCreations(false)}
-            />
-          </div>
-        </div>
-        <div className="absolute left-1/4 w-3/4 h-full">
+    <div className="flex justify-center items-center h-screen">
+      <div className="w-[808px] h-full border-l-4 border-r-4 border-amber-200 bg-black">
+        <div className="h-16 flex pl-2 pr-2">
+          <img
+            className="h-full inline-block pt-1"
+            src="/genie2.png"
+            alt="logo"
+          />
           <PromptBar
             prompt={creation.title}
+            hasUnsavedChanges={!contentSaved}
             onPromptChange={onPromptChange}
             onCreationChange={setCreationAndRefreshView}
-          />
-          <textarea
-            className="w-full h-[calc(100%-7rem)] absolute top-[3.5rem] bottom-0 box-border p-2.5"
-            value={creation.content || ""}
-            onChange={onContentChange}
-          />
-          <ActionBar
-            creation={creation}
-            onCreationChange={setCreationAndRefreshView}
-            showPreview={showPreview}
-            saveCreation={saveCreation}
+            className="grow border-0 bg-black pt-2"
           />
         </div>
-      </div>
-      <div className="absolute inset-y-0 right-0 w-1/2 bg-black">
-        <Preview previewObjects={preview} />
+        <div className="h-[calc(100%-8rem)]">
+          <Preview previewObjects={preview} />
+        </div>
+        <ActionBar
+          creation={creation}
+          onCreationChange={setCreationAndRefreshView}
+          actions={[availableActions.refine, availableActions.share]}
+          shareCreation={shareCreation}
+          className="border-0 bg-black pr-2"
+        />
       </div>
     </div>
   );

@@ -3,47 +3,48 @@ import Button from "@/components/shared/Button";
 import Modal from "@/components/shared/Modal";
 import RefineForm from "@/components/RefineForm";
 
+export const availableActions = {
+  refine: "refine",
+  save: "save",
+  preview: "preview",
+  share: "share",
+};
+
 export default function ActionBar({
   creation,
   onCreationChange,
+  actions,
   showPreview,
   saveCreation,
+  shareCreation,
+  className,
 }) {
-  const [saving, setSaving] = useState(false);
   const [refine, setRefine] = useState(false);
 
   function canRefine() {
     return creation.refinesLeft > 0;
   }
 
-  function showRefinePopup(event) {
-    event.preventDefault();
+  async function showRefinePopup(event) {
     if (canRefine()) {
       setRefine(true);
     }
   }
 
-  function onPreview(event) {
-    event.preventDefault();
-    showPreview();
-  }
-
-  async function onSave(event) {
-    event.preventDefault();
-    if (saving) {
-      return;
-    }
-    setSaving(true);
-    await saveCreation();
-    setSaving(false);
-  }
-
   return (
-    <div className="h-14 border flex justify-end w-full items-center pl-2.5 box-border absolute bottom-0">
+    <div
+      className={`h-14 border flex justify-end w-full items-center pl-2.5 box-border bottom-0 ${className}`}
+    >
       <div>
-        <Button disabled={!canRefine()} onClick={showRefinePopup}>
-          Refine Creation
-        </Button>
+        {actions.includes(availableActions.refine) && (
+          <Button
+            disabled={!canRefine()}
+            onClick={showRefinePopup}
+            className="mr-2.5"
+          >
+            Refine Spell
+          </Button>
+        )}
         <Modal isOpen={refine} onClose={() => setRefine(false)}>
           <RefineForm
             creation={creation}
@@ -51,10 +52,33 @@ export default function ActionBar({
             onComplete={() => setRefine(false)}
           />
         </Modal>
-        <Button onClick={onSave} disabled={saving}>
-          Save
-        </Button>
-        <Button onClick={onPreview}>Reload &#187;</Button>
+        {actions.includes(availableActions.save) && (
+          <Button
+            onClick={saveCreation}
+            disabled={creation.validate().errors.length > 0}
+            className="mr-2.5"
+          >
+            Save
+          </Button>
+        )}
+        {actions.includes(availableActions.share) && (
+          <Button
+            onClick={shareCreation}
+            disabled={creation.validate().errors.length > 0}
+            className="mr-2.5"
+          >
+            Share
+          </Button>
+        )}
+        {actions.includes(availableActions.reload) && (
+          <Button
+            onClick={showPreview}
+            disabled={!creation.content}
+            className="mr-2.5"
+          >
+            Reload &#187;
+          </Button>
+        )}
       </div>
     </div>
   );

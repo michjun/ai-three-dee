@@ -1,18 +1,38 @@
-import React from "react";
+import React, { useState } from "react";
 
-const Button = ({ children, onClick, disabled, className, ...props }) => {
+const Button = ({
+  children,
+  onClick,
+  disabled,
+  className,
+  loadingText,
+  ...props
+}) => {
   const disabledStyle = "bg-gray-300 text-gray-500 cursor-not-allowed";
-  const normalStyle = "bg-lime-800 hover:bg-lime-600 cursor-pointer";
+  const normalStyle = "bg-teal-700 hover:bg-teal-600 cursor-pointer";
+
+  const [loading, setLoading] = useState(false);
+
+  async function onButtonClick(event) {
+    event.preventDefault();
+    if (loading) {
+      return;
+    }
+    setLoading(true);
+    await onClick(event);
+    setLoading(false);
+  }
+
   return (
     <button
-      className={`text-white text-base py-2 px-2.5 border-none text-sm rounded-md mr-2.5 focus:outline-none ${
-        disabled ? disabledStyle : normalStyle
+      className={`text-white text-base py-2 px-2.5 border-none text-sm rounded-md focus:outline-none ${
+        disabled || loading ? disabledStyle : normalStyle
       } ${className}`}
-      onClick={onClick}
-      disabled={disabled}
+      onClick={onButtonClick}
+      disabled={disabled || loading}
       {...props}
     >
-      {children}
+      {loading && loadingText ? loadingText : children}
     </button>
   );
 };
