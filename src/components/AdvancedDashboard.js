@@ -82,7 +82,7 @@ export default function AdvancedDashboard() {
     } catch (error) {
       console.error("Error parsing the input string:", error);
       alert(
-        "Genie: Sorry, I am currently having a mental breakdown. Please try again later."
+        "3DGenie: Sorry, I am currently having a mental breakdown. Please try again later."
       );
     }
   }
@@ -129,7 +129,7 @@ export default function AdvancedDashboard() {
           <div className="border-b border-neutral-300 bg-black h-14">
             <img className="h-full inline-block" src="/genie2.png" alt="logo" />
             <div className="pl-2 align-middle font-extrabold text-white text-lg hidden lg:inline-block">
-              3dGenie
+              3DGenie
             </div>
           </div>
           <div className="h-[calc(100%-3.5rem)] overflow-scroll">

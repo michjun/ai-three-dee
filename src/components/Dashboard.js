@@ -3,13 +3,23 @@ import PromptBar from "@/components/PromptBar";
 import { useEffect, useState } from "react";
 import ActionBar, { availableActions } from "@/components/ActionBar";
 import CreationData from "@/models/CreationData";
-import { data } from "autoprefixer";
+import Modal from "@/components/shared/Modal";
 
 export default function Dashboard() {
   const [creation, setCreation] = useState(new CreationData());
   const [preview, setPreview] = useState([]);
   const [contentSaved, setContentSaved] = useState(true);
   const [refreshPreview, setRefreshPreview] = useState(false);
+  const [showWelcomeMsg, setShowWelcomeMsg] = useState(false);
+
+  useEffect(() => {
+    const welcomeMsgSeen = window.localStorage.getItem("welcomeMsgSeen");
+
+    if (!welcomeMsgSeen) {
+      setShowWelcomeMsg(true);
+      window.localStorage.setItem("welcomeMsgSeen", true);
+    }
+  }, []);
 
   useEffect(() => {
     if (refreshPreview) {
@@ -75,7 +85,7 @@ export default function Dashboard() {
     } catch (error) {
       console.error("Error parsing the input string:", error);
       alert(
-        "Genie: Sorry, I am currently having a mental breakdown. Please try again later."
+        "3DGenie: Sorry, I am currently having a mental breakdown. Please try again later."
       );
     }
   }
@@ -106,11 +116,13 @@ export default function Dashboard() {
     <div className="flex justify-center items-center h-screen">
       <div className="w-[808px] h-full border-l-4 border-r-4 border-amber-200 bg-black">
         <div className="h-16 flex pl-2 pr-2">
-          <img
-            className="h-full inline-block pt-1"
-            src="/genie2.png"
-            alt="logo"
-          />
+          <a href="/">
+            <img
+              className="h-full inline-block pt-1"
+              src="/genie2.png"
+              alt="logo"
+            />
+          </a>
           <PromptBar
             prompt={creation.title}
             hasUnsavedChanges={!contentSaved}
@@ -125,11 +137,29 @@ export default function Dashboard() {
         <ActionBar
           creation={creation}
           onCreationChange={setCreationAndRefreshView}
-          actions={[availableActions.refine, availableActions.share]}
+          actions={[
+            availableActions.gallery,
+            availableActions.refine,
+            availableActions.share,
+          ]}
           shareCreation={shareCreation}
           className="border-0 bg-black pr-2"
         />
       </div>
+      <Modal isOpen={showWelcomeMsg} onClose={() => setShowWelcomeMsg(false)}>
+        <div className="w-full p-4">
+          <img className="h-full inline-block" src="/genie2.png" alt="logo" />
+          <div className="pt-2">
+            Greetings and salutations! I am the mystical 3DGenie, your host in
+            this wondrous realm! My magic enables me to conjure 3D models spun
+            from your wildest dreams. Whisper your desires into the textbox
+            perched atop your screen, and behold as I weave a spell, bringing
+            your vision to life! At your beck and call, I am, ready to sprinkle
+            a dash of fun on your day! Step right in, and may your journey be
+            filled with marvels!
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 }

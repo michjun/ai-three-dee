@@ -4,6 +4,7 @@ import Modal from "@/components/shared/Modal";
 import RefineForm from "@/components/RefineForm";
 
 export const availableActions = {
+  gallery: "gallery",
   refine: "refine",
   save: "save",
   preview: "preview",
@@ -31,10 +32,23 @@ export default function ActionBar({
     }
   }
 
+  function showGallery(e) {
+    e.preventDefault();
+    // TODO: gallery index page, remove hardcode ID
+    window.location.href = `/gallery/645301ac77a3944f941ee4d4`;
+  }
+
   return (
     <div
-      className={`h-14 border flex justify-end w-full items-center pl-2.5 box-border bottom-0 ${className}`}
+      className={`h-14 border flex justify-between w-full items-center pl-2.5 box-border bottom-0 ${className}`}
     >
+      <div>
+        {actions.includes(availableActions.gallery) && (
+          <Button className="ml-2.5" onClick={showGallery}>
+            3DGenie's Showroom
+          </Button>
+        )}
+      </div>
       <div>
         {actions.includes(availableActions.refine) && (
           <Button

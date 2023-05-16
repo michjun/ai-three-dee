@@ -44,7 +44,7 @@ export default function RefineForm({ creation, onCreationChange, onComplete }) {
 
   return (
     <form className="w-full p-2">
-      <strong>Genie:</strong> I have heard your words. {creation.refinesLeft}{" "}
+      <strong>3DGenie:</strong> I have heard your words. {creation.refinesLeft}{" "}
       wishes yet remain for you. Now, tell me, what transformation do you desire
       for the humble {creation.title}?
       <textarea

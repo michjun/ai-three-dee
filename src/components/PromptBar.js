@@ -10,7 +10,7 @@ export default function PromptBar({
 }) {
   async function onSubmit(event) {
     if (!prompt) {
-      alert("Please enter your wish to the Genie.");
+      alert("Please enter your wish to the 3DGenie.");
       return;
     }
     if (hasUnsavedChanges) {
@@ -61,7 +61,7 @@ export default function PromptBar({
           className="p-1.5 mr-2 flex-grow"
           type="text"
           value={prompt || ""}
-          placeholder="Genie, grant me a stunning 3D model of a..."
+          placeholder="3DGenie, grant me a stunning 3D model of a..."
           onChange={onPromptChange}
         />
         <Button

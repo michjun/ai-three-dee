@@ -79,7 +79,7 @@ export default function Gallery({ creationId }) {
     } catch (error) {
       console.error("Error parsing the input string:", error);
       alert(
-        "Genie: Sorry, I am currently having a mental breakdown. Please try again later."
+        "3DGenie: Sorry, I am currently having a mental breakdown. Please try again later."
       );
     }
   }
@@ -93,13 +93,15 @@ export default function Gallery({ creationId }) {
     >
       <div className="w-[808px] h-full border-l-4 border-r-4 border-amber-200 bg-black">
         <div className="h-16 pl-2 pr-2">
-          <img
-            className="h-full inline-block pt-1"
-            src="/genie2.png"
-            alt="logo"
-          />
+          <a href="/">
+            <img
+              className="h-full inline-block pt-1"
+              src="/genie2.png"
+              alt="logo"
+            />
+          </a>
           <div className="pl-2 align-middle font-extrabold text-white text-xl inline-block">
-            Genie's Gallery
+            3DGenie's Showroom
           </div>
         </div>
         <div className="h-[calc(100%-8rem)] overflow-scroll">
@@ -107,13 +109,13 @@ export default function Gallery({ creationId }) {
         </div>
         <div className="h-14 flex justify-between w-full items-center pl-2.5 box-border bottom-0">
           <Button disabled={!previous} onClick={showPrevious}>
-            &laquo; Previous
+            <div className="pb-1 text-[22px]">&nbsp;&#8249;&nbsp;</div>
           </Button>
           <div className="text-white flex-grow text-center text-lg">
             {creation.title}
           </div>
           <Button disabled={!next} onClick={showNext} className="mr-2.5">
-            Next &raquo;
+            <div className="pb-1 text-[22px]">&nbsp;&#8250;&nbsp;</div>
           </Button>
         </div>
       </div>
