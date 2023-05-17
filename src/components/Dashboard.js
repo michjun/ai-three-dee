@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import ActionBar, { availableActions } from "@/components/ActionBar";
 import CreationData from "@/models/CreationData";
 import Modal from "@/components/shared/Modal";
+import HeaderLogo from "@/components/HeaderLogo";
 
 export default function Dashboard() {
   const [creation, setCreation] = useState(new CreationData());
@@ -116,13 +117,7 @@ export default function Dashboard() {
     <div className="flex justify-center items-center h-screen">
       <div className="w-[808px] h-full border-l-4 border-r-4 border-amber-200 bg-black">
         <div className="h-16 flex pl-2 pr-2">
-          <a href="/">
-            <img
-              className="h-full inline-block pt-1"
-              src="/genie2.png"
-              alt="logo"
-            />
-          </a>
+          <HeaderLogo />
           <PromptBar
             prompt={creation.title}
             hasUnsavedChanges={!contentSaved}
@@ -146,17 +141,26 @@ export default function Dashboard() {
           className="border-0 bg-black pr-2"
         />
       </div>
-      <Modal isOpen={showWelcomeMsg} onClose={() => setShowWelcomeMsg(false)}>
+      <Modal
+        easeIn={true}
+        isOpen={showWelcomeMsg}
+        onClose={() => setShowWelcomeMsg(false)}
+      >
         <div className="w-full p-4">
           <img className="h-full inline-block" src="/genie2.png" alt="logo" />
-          <div className="pt-2">
+          <div className="pt-4 text-center">
             Greetings and salutations! I am the mystical 3DGenie, your host in
             this wondrous realm! My magic enables me to conjure 3D models spun
-            from your wildest dreams. Whisper your desires into the textbox
-            perched atop your screen, and behold as I weave a spell, bringing
-            your vision to life! At your beck and call, I am, ready to sprinkle
-            a dash of fun on your day! Step right in, and may your journey be
-            filled with marvels!
+            from your wildest dreams. Whisper your desires into the textbox atop
+            your screen, and behold as I weave a spell, bringing your vision to
+            life!
+            <br />
+            <br />
+            Now, I must confess, even a genie's work might not always be
+            flawless. But fret not, for you have three precious chances to guide
+            me, refining and perfecting my creation to your satisfaction. At
+            your beck and call, I am, ready to sprinkle a dash of fun on your
+            day! Step right in, and may your journey be filled with marvels!
           </div>
         </div>
       </Modal>

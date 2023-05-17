@@ -1,12 +1,20 @@
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import Button from "@/components/shared/Button";
 import CreationData from "@/models/CreationData";
+import Modal from "@/components/shared/Modal";
 
-export default function RefineForm({ creation, onCreationChange, onComplete }) {
+export default function RefineForm({
+  showForm,
+  creation,
+  onCreationChange,
+  onComplete,
+}) {
+  const [canClose, setCanClose] = useState(true);
   const promptInput = useRef();
 
   async function onSubmit() {
     try {
+      setCanClose(false);
       const response = await fetch("/api/refine", {
         method: "POST",
         headers: {
@@ -40,27 +48,42 @@ export default function RefineForm({ creation, onCreationChange, onComplete }) {
       console.error(error);
       alert(error.message);
     }
+    setCanClose(true);
   }
 
   return (
-    <form className="w-full p-2">
-      <strong>3DGenie:</strong> I have heard your words. {creation.refinesLeft}{" "}
-      wishes yet remain for you. Now, tell me, what transformation do you desire
-      for the humble {creation.title}?
-      <textarea
-        className="p-1.5 mr-4 mt-4 mb-4 h-20 w-full border border-neutral-300 rounded"
-        type="text"
-        ref={promptInput}
-      />
-      <div className="flex justify-end w-full">
-        <Button
-          onClick={onSubmit}
-          loadingText="Producing Spell..."
-          className="mr-0"
-        >
-          Send My Wish
-        </Button>
-      </div>
-    </form>
+    <Modal
+      isOpen={showForm}
+      onClose={() => {
+        if (canClose) {
+          onComplete();
+        }
+      }}
+    >
+      <form className="w-full p-4">
+        <img className="h-full inline-block" src="/genie2.png" alt="logo" />
+        <div className="pt-4 text-center">
+          I have heard your words. {creation.refinesLeft} wishes yet remain for
+          you.
+          <br />
+          Now, tell me, what transformation or improvements do you desire from
+          the humble {creation.title}?
+        </div>
+        <textarea
+          className="p-1.5 mr-4 mt-4 mb-4 h-20 w-full border border-neutral-300 rounded"
+          type="text"
+          ref={promptInput}
+        />
+        <div className="flex justify-end w-full">
+          <Button
+            onClick={onSubmit}
+            loadingText="Producing Spell, Please Wait..."
+            className="mr-0"
+          >
+            Send My Wish
+          </Button>
+        </div>
+      </form>
+    </Modal>
   );
 }

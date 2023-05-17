@@ -1,5 +1,8 @@
+import { useState } from "react";
 import Button from "@/components/shared/Button";
 import CreationData from "@/models/CreationData";
+import WaitingMessage from "@/components/WaitingMessage";
+import Modal from "@/components/shared/Modal";
 
 export default function PromptBar({
   prompt,
@@ -8,6 +11,8 @@ export default function PromptBar({
   onCreationChange,
   className,
 }) {
+  const [showWaitMessage, setShowWaitMessage] = useState(false);
+
   async function onSubmit(event) {
     if (!prompt) {
       alert("Please enter your wish to the 3DGenie.");
@@ -21,6 +26,10 @@ export default function PromptBar({
     onCreationChange(new CreationData(prompt));
 
     try {
+      setTimeout(() => {
+        setShowWaitMessage(true);
+      }, 10000);
+
       const response = await fetch("/api/generate", {
         method: "POST",
         headers: {
@@ -29,6 +38,7 @@ export default function PromptBar({
         body: JSON.stringify({ creationDescription: prompt }),
       });
       const data = await response.json();
+      setShowWaitMessage(false);
       if (response.status !== 200) {
         throw (
           data.error ||
@@ -47,6 +57,7 @@ export default function PromptBar({
         )
       );
     } catch (error) {
+      setShowWaitMessage(false);
       console.error(error);
       alert(error.message);
     }
@@ -73,6 +84,13 @@ export default function PromptBar({
           Send My Wish
         </Button>
       </form>
+      <Modal
+        easeIn={true}
+        isOpen={showWaitMessage}
+        onClose={() => setShowWaitMessage(false)}
+      >
+        <WaitingMessage />
+      </Modal>
     </div>
   );
 }

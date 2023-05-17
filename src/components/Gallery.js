@@ -2,6 +2,7 @@ import Preview from "@/components/Preview";
 import { useEffect, useRef, useState } from "react";
 import CreationData from "@/models/CreationData";
 import Button from "@/components/shared/Button";
+import HeaderLogo from "@/components/HeaderLogo";
 
 export default function Gallery({ creationId }) {
   const mainRef = useRef();
@@ -43,7 +44,6 @@ export default function Gallery({ creationId }) {
   }, [creation]);
 
   function handleKeyUp(e) {
-    console.log(e);
     switch (e.key) {
       case "ArrowLeft":
         showPrevious(e);
@@ -93,13 +93,7 @@ export default function Gallery({ creationId }) {
     >
       <div className="w-[808px] h-full border-l-4 border-r-4 border-amber-200 bg-black">
         <div className="h-16 pl-2 pr-2">
-          <a href="/">
-            <img
-              className="h-full inline-block pt-1"
-              src="/genie2.png"
-              alt="logo"
-            />
-          </a>
+          <HeaderLogo />
           <div className="pl-2 align-middle font-extrabold text-white text-xl inline-block">
             3DGenie's Showroom
           </div>

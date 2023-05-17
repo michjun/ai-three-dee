@@ -43,7 +43,6 @@ export default async function (req, res) {
       messages: messages,
     });
     const result = completion.data.choices[0].message;
-    console.log(result);
     chatThread.messages.push(result);
     chatThread.refineCount += 1;
     chatThread.save();

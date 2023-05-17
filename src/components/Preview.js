@@ -67,7 +67,7 @@ export default function Preview({ previewObjects }) {
       p.draw = () => {
         p.background(0);
         p.ambientLight(100);
-        p.pointLight(255, 255, 255, 0, 0, 300);
+        p.pointLight(255, 255, 255, 0, -200, 300);
 
         p.push();
         p.rotateY(angleY);

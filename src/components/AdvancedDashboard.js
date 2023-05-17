@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import CreationData from "@/models/CreationData";
 import { availableActions } from "@/components/ActionBar";
 import ActionBar from "@/components/ActionBar";
+import HeaderLogo from "@/components/HeaderLogo";
 
 export default function AdvancedDashboard() {
   const [creation, setCreation] = useState(new CreationData());
@@ -127,10 +128,7 @@ export default function AdvancedDashboard() {
       <div className="absolute inset-y-0 w-1/2 font-mono">
         <div className="absolute w-1/4 h-full bg-gradient-to-b from-sky-800 to-indigo-800">
           <div className="border-b border-neutral-300 bg-black h-14">
-            <img className="h-full inline-block" src="/genie2.png" alt="logo" />
-            <div className="pl-2 align-middle font-extrabold text-white text-lg hidden lg:inline-block">
-              3DGenie
-            </div>
+            <HeaderLogo showTitle={true} />
           </div>
           <div className="h-[calc(100%-3.5rem)] overflow-scroll">
             <CreationList

@@ -1,6 +1,5 @@
 import { useState } from "react";
 import Button from "@/components/shared/Button";
-import Modal from "@/components/shared/Modal";
 import RefineForm from "@/components/RefineForm";
 
 export const availableActions = {
@@ -45,7 +44,7 @@ export default function ActionBar({
       <div>
         {actions.includes(availableActions.gallery) && (
           <Button className="ml-2.5" onClick={showGallery}>
-            3DGenie's Showroom
+            Visit Showroom
           </Button>
         )}
       </div>
@@ -59,13 +58,12 @@ export default function ActionBar({
             Refine Spell
           </Button>
         )}
-        <Modal isOpen={refine} onClose={() => setRefine(false)}>
-          <RefineForm
-            creation={creation}
-            onCreationChange={onCreationChange}
-            onComplete={() => setRefine(false)}
-          />
-        </Modal>
+        <RefineForm
+          showForm={refine}
+          creation={creation}
+          onCreationChange={onCreationChange}
+          onComplete={() => setRefine(false)}
+        />
         {actions.includes(availableActions.save) && (
           <Button
             onClick={saveCreation}
