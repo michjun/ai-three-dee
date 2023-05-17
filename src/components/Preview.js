@@ -41,9 +41,9 @@ export default function Preview({ previewObjects }) {
           p.rotateZ(obj.rotation.z);
           p.scale(obj.scale.x, obj.scale.y, obj.scale.z);
 
-          if (obj.shape === "Cube") {
+          if (obj.shape === "Cube" || obj.shape === "Box") {
             p.box(unit);
-          } else if (obj.shape === "Ball") {
+          } else if (obj.shape === "Ball" || obj.shape === "Sphere") {
             p.sphere(unit);
           } else if (obj.shape === "Cylinder") {
             p.cylinder(unit);
@@ -53,7 +53,7 @@ export default function Preview({ previewObjects }) {
             p.cone(unit, unit, 4);
           } else if (obj.shape === "Square Pyramid") {
             p.cone(unit, unit, 5);
-          } else if (obj.shape === "Donut") {
+          } else if (obj.shape === "Donut" || obj.shape === "Ring") {
             p.torus(unit, unit / 3);
           }
           p.pop();
