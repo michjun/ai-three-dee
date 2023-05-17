@@ -10,14 +10,13 @@ Cube, Ball, Cylinder, Cone, Triangle Pyramid, Square Pyramid, Donut
 Initial direction of shapes without rotation:
 - Cylinder is standing up
 - Cone, Triangle Pyramid, and Square Pyramid are upside down
-- Donut's hole is on the xy-plane.
 
 Return the result using the format below:
 [{name: "Ring", shape: "Donut", position: {x: 0, y: 0, z: 0}, rotation: {x: 0, y: 0, z: 0}, scale: {x: 1, y: 1, z: 1}}]
 
-Rotation are specified in radians.
-Use the exact shape names given.
-If user prompt is unrelated to the object, ignore.
+Rotation are specified in radians
+Use the exact shape names given
+If prompt is unrelated to the object, return "Unrelated"
 `;
 
 // TODO: store examples in database

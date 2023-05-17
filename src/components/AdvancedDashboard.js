@@ -147,7 +147,7 @@ export default function AdvancedDashboard() {
             className="bg-gradient-to-r from-sky-800 to-indigo-800"
           />
           <textarea
-            className="w-full h-[calc(100%-7rem)] absolute top-[3.5rem] bottom-0 box-border p-2.5"
+            className="w-full h-[calc(100%-7.5rem)] absolute top-[3.5rem] bottom-0 box-border p-2.5"
             value={creation.content || ""}
             onChange={onContentChange}
           />

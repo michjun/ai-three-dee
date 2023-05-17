@@ -90,32 +90,29 @@ export default function WaitingMessage() {
   }
 
   return (
-    <div className="w-full p-4">
-      <img className="h-full inline-block" src="/genie2.png" alt="logo" />
-      <div className="pt-4 text-center">
-        Apologies for the sands of time trickling slowly, dear friend. Exquisite
-        creations demand patience, after all! While my magical incantations
-        weave the fabric of your 3D wish, how about we share a chuckle or two?
-        <br />
-        <br />
-        Ready for a jest? Here goes:
-        <br />
-        <br />
-        {joke && (
-          <div className="font-bold">
-            {joke[0]}
-            <br />
-            <span
-              className={showJokeAnswer ? "" : "bg-black cursor-pointer"}
-              onClick={() => {
-                setShowJokeAnswer(true);
-              }}
-            >
-              {joke[1]}
-            </span>
-          </div>
-        )}
-      </div>
+    <div className="text-center">
+      Apologies for the sands of time trickling slowly, dear friend. Exquisite
+      creations demand patience, after all! While my magical incantations weave
+      the fabric of your 3D wish, how about we share a chuckle or two?
+      <br />
+      <br />
+      Ready for a jest? Here goes:
+      <br />
+      <br />
+      {joke && (
+        <div className="font-bold">
+          {joke[0]}
+          <br />
+          <span
+            className={showJokeAnswer ? "" : "bg-black cursor-pointer"}
+            onClick={() => {
+              setShowJokeAnswer(true);
+            }}
+          >
+            {joke[1]}
+          </span>
+        </div>
+      )}
     </div>
   );
 }

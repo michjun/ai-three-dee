@@ -26,9 +26,9 @@ export default function PromptBar({
     onCreationChange(new CreationData(prompt));
 
     try {
-      setTimeout(() => {
+      const waitMsgTimeout = setTimeout(() => {
         setShowWaitMessage(true);
-      }, 10000);
+      }, 8000);
 
       const response = await fetch("/api/generate", {
         method: "POST",
@@ -39,6 +39,8 @@ export default function PromptBar({
       });
       const data = await response.json();
       setShowWaitMessage(false);
+      clearTimeout(waitMsgTimeout);
+
       if (response.status !== 200) {
         throw (
           data.error ||
@@ -48,16 +50,23 @@ export default function PromptBar({
       // Sometimes ChatGPT returns extra text before the actual result,
       // so trim everything before the first "[" character
       const content = data.result.content;
-      onCreationChange(
-        new CreationData(
-          prompt,
-          content.slice(content.indexOf("[")),
-          data.threadId,
-          data.refinesLeft
-        )
-      );
+      if (content === "Unrelated") {
+        alert(
+          "Ah, a twist in the cosmic tale! Your wish, dear friend, is beyond my mystical reach. Please, bestow upon me another request!"
+        );
+      } else {
+        onCreationChange(
+          new CreationData(
+            prompt,
+            content.slice(content.indexOf("[")),
+            data.threadId,
+            data.refinesLeft
+          )
+        );
+      }
     } catch (error) {
       setShowWaitMessage(false);
+      clearTimeout(waitMsgTimeout);
       console.error(error);
       alert(error.message);
     }
@@ -65,11 +74,11 @@ export default function PromptBar({
 
   return (
     <div
-      className={`h-14 border flex items-center pl-2.5 box-border ${className}`}
+      className={`h-14 border flex items-center pl-2 box-border ${className}`}
     >
       <form className="flex w-full">
         <input
-          className="p-1.5 mr-2 flex-grow"
+          className="p-1.5 mr-2 flex-grow rounded-sm"
           type="text"
           value={prompt || ""}
           placeholder="3DGenie, grant me a stunning 3D model of a..."
@@ -87,6 +96,7 @@ export default function PromptBar({
       <Modal
         easeIn={true}
         isOpen={showWaitMessage}
+        imgSrc="/genie2.png"
         onClose={() => setShowWaitMessage(false)}
       >
         <WaitingMessage />

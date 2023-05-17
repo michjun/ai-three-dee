@@ -8,8 +8,9 @@ const Button = ({
   loadingText,
   ...props
 }) => {
-  const disabledStyle = "bg-gray-300 text-gray-500 cursor-not-allowed";
-  const normalStyle = "bg-teal-700 hover:bg-teal-600 cursor-pointer";
+  const disabledStyle = "bg-neutral-400 text-neutral-200 cursor-not-allowed";
+  const normalStyle =
+    "bg-amber-700 hover:bg-amber-600 cursor-pointer shadow-inner shadow-amber-500/40";
 
   const [loading, setLoading] = useState(false);
 

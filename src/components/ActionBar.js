@@ -39,7 +39,7 @@ export default function ActionBar({
 
   return (
     <div
-      className={`h-14 border flex justify-between w-full items-center pl-2.5 box-border bottom-0 ${className}`}
+      className={`h-16 border flex justify-between w-full items-center pl-2.5 box-border bottom-0 ${className}`}
     >
       <div>
         {actions.includes(availableActions.gallery) && (

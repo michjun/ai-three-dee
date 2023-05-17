@@ -35,14 +35,28 @@ export default function RefineForm({
       // Sometimes ChatGPT returns extra text before the actual result,
       // so trim everything before the first "[" character
       const content = data.result.content;
-      onCreationChange(
-        new CreationData(
-          creation.title,
-          content.slice(content.indexOf("[")),
-          data.threadId,
-          data.refinesLeft
-        )
-      );
+      if (content === "Unrelated") {
+        onCreationChange(
+          new CreationData(
+            creation.title,
+            creation.content,
+            data.threadId,
+            data.refinesLeft
+          )
+        );
+        alert(
+          "Ah, a twist in the cosmic tale! Your wish, dear friend, is beyond my mystical reach. Please, bestow upon me another request!"
+        );
+      } else {
+        onCreationChange(
+          new CreationData(
+            creation.title,
+            content.slice(content.indexOf("[")),
+            data.threadId,
+            data.refinesLeft
+          )
+        );
+      }
       onComplete();
     } catch (error) {
       console.error(error);
@@ -54,15 +68,15 @@ export default function RefineForm({
   return (
     <Modal
       isOpen={showForm}
+      imgSrc="/genie2.png"
       onClose={() => {
         if (canClose) {
           onComplete();
         }
       }}
     >
-      <form className="w-full p-4">
-        <img className="h-full inline-block" src="/genie2.png" alt="logo" />
-        <div className="pt-4 text-center">
+      <form>
+        <div className="text-center">
           I have heard your words. {creation.refinesLeft} wishes yet remain for
           you.
           <br />

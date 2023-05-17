@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 
-const Modal = ({ isOpen, onClose, easeIn = false, children }) => {
+const Modal = ({ isOpen, onClose, imgSrc, easeIn = false, children }) => {
   const [opacityClass, setOpacityClass] = useState("");
 
   useEffect(() => {
@@ -16,7 +16,7 @@ const Modal = ({ isOpen, onClose, easeIn = false, children }) => {
   }
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50">
+    <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-40">
       <div
         className={`relative bg-amber-100 rounded p-6 w-full max-w-lg ${
           easeIn
@@ -30,7 +30,16 @@ const Modal = ({ isOpen, onClose, easeIn = false, children }) => {
         >
           &times;
         </button>
-        {children}
+        <div className="w-full p-4">
+          {imgSrc && (
+            <img
+              className="h-full inline-block rounded-sm mb-4"
+              src={imgSrc}
+              alt="modalAvatar"
+            />
+          )}
+          {children}
+        </div>
       </div>
     </div>
   );
