@@ -28,7 +28,6 @@ export default function Gallery() {
 
   useEffect(() => {
     if (!router.isReady) return;
-    console.log(router.query);
     setCreationId(router.query.id);
   }, [router.isReady]);
 
