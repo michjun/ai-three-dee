@@ -115,7 +115,7 @@ export default function Gallery({ creationId }) {
             </div>
           </div>
           <div className="pt-3 pr-1">
-            <Button onClick={goToHome}>Start Creating</Button>
+            <Button onClick={goToHome}>Start Creating &raquo;</Button>
           </div>
         </div>
         <div className="h-[calc(100%-8rem)] overflow-scroll">
