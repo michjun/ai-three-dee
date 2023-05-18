@@ -95,6 +95,10 @@ export default function Gallery({ creationId }) {
     }
   }
 
+  function goToHome() {
+    window.location.href = "/";
+  }
+
   return (
     <div
       className="flex justify-center items-center h-screen"
@@ -103,10 +107,15 @@ export default function Gallery({ creationId }) {
       tabIndex={0}
     >
       <div className="w-[808px] h-full border-l-4 border-r-4 border-amber-200 bg-black">
-        <div className="h-16 pl-2 pr-2 border-b-2 border-neutral-600">
-          <HeaderLogo />
-          <div className="pl-2 align-middle font-extrabold text-white text-xl inline-block">
-            3DGenie's Showroom
+        <div className="h-16 pl-2 pr-2 border-b-2 border-neutral-600 flex justify-between">
+          <div>
+            <HeaderLogo />
+            <div className="pl-2 align-middle font-extrabold text-white text-xl inline-block">
+              3DGenie's Showroom
+            </div>
+          </div>
+          <div className="pt-3 pr-1">
+            <Button onClick={goToHome}>Start Creating</Button>
           </div>
         </div>
         <div className="h-[calc(100%-8rem)] overflow-scroll">
