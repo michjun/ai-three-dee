@@ -25,11 +25,10 @@ export default function PromptBar({
     }
     onCreationChange(new CreationData(prompt));
 
+    const waitMsgTimeout = setTimeout(() => {
+      setShowWaitMessage(true);
+    }, 8000);
     try {
-      const waitMsgTimeout = setTimeout(() => {
-        setShowWaitMessage(true);
-      }, 8000);
-
       const response = await fetch("/api/generate", {
         method: "POST",
         headers: {

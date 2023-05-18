@@ -100,11 +100,11 @@ export default function WaitingMessage() {
       <br />
       <br />
       {joke && (
-        <div className="font-bold">
+        <div>
           {joke[0]}
           <br />
           <span
-            className={showJokeAnswer ? "" : "bg-black cursor-pointer"}
+            className={showJokeAnswer ? "font-bold" : "bg-black cursor-pointer"}
             onClick={() => {
               setShowJokeAnswer(true);
             }}
