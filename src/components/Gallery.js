@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import CreationData from "@/models/CreationData";
 import Button from "@/components/shared/Button";
 import HeaderLogo from "@/components/HeaderLogo";
+import Modal from "@/components/shared/Modal";
 
 export default function Gallery({ creationId }) {
   const mainRef = useRef();
@@ -10,6 +11,16 @@ export default function Gallery({ creationId }) {
   const [preview, setPreview] = useState([]);
   const [previous, setPrevious] = useState(null);
   const [next, setNext] = useState(null);
+  const [showGalleryMsg, setShowGalleryMsg] = useState(false);
+
+  useEffect(() => {
+    const galleryMsgSeen = window.localStorage.getItem("galleryMsgSeen");
+
+    if (!galleryMsgSeen) {
+      setShowGalleryMsg(true);
+      window.localStorage.setItem("galleryMsgSeen", true);
+    }
+  }, []);
 
   useEffect(() => {
     if (!creationId) {
@@ -113,6 +124,21 @@ export default function Gallery({ creationId }) {
           </Button>
         </div>
       </div>
+      <Modal
+        isOpen={showGalleryMsg}
+        imgSrc="/genie2.png"
+        onClose={() => setShowGalleryMsg(false)}
+      >
+        <div className="text-center">
+          Greetings, traveler! I am 3D Genie, master of this grand exhibit,
+          powered by the sorcery of GPT-4! Marvel at the dreams I've sculpted
+          into existence!
+          <br />
+          <br />
+          Revel in their splendor, and dare you might, cast your own wish into
+          my mystical cauldron for manifestation!
+        </div>
+      </Modal>
     </div>
   );
 }
