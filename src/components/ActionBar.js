@@ -32,7 +32,6 @@ export default function ActionBar({
   }
 
   function showGallery(e) {
-    e.preventDefault();
     // TODO: gallery index page, remove hardcode ID
     window.location.href = `/gallery/645301ac77a3944f941ee4d4`;
   }

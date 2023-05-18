@@ -1,12 +1,16 @@
 import Preview from "@/components/Preview";
 import { useEffect, useRef, useState } from "react";
+import { useRouter } from "next/router";
 import CreationData from "@/models/CreationData";
 import Button from "@/components/shared/Button";
 import HeaderLogo from "@/components/HeaderLogo";
 import Modal from "@/components/shared/Modal";
 
-export default function Gallery({ creationId }) {
+export default function Gallery() {
   const mainRef = useRef();
+  const router = useRouter();
+
+  const [creationId, setCreationId] = useState(null);
   const [creation, setCreation] = useState(new CreationData());
   const [preview, setPreview] = useState([]);
   const [previous, setPrevious] = useState(null);
@@ -21,6 +25,12 @@ export default function Gallery({ creationId }) {
       window.localStorage.setItem("galleryMsgSeen", true);
     }
   }, []);
+
+  useEffect(() => {
+    if (!router.isReady) return;
+    console.log(router.query);
+    setCreationId(router.query.id);
+  }, [router.isReady]);
 
   useEffect(() => {
     if (!creationId) {
@@ -68,19 +78,19 @@ export default function Gallery({ creationId }) {
   }
 
   function showPrevious(e) {
-    e.preventDefault();
     if (!previous) {
       return;
     }
-    window.location.href = `/gallery/${previous}`;
+    setCreationId(previous);
+    router.push(`/gallery/${previous}`, undefined, { shallow: true });
   }
 
   function showNext(e) {
-    e.preventDefault();
     if (!next) {
       return;
     }
-    window.location.href = `/gallery/${next}`;
+    setCreationId(next);
+    router.push(`/gallery/${next}`, undefined, { shallow: true });
   }
 
   function showPreview() {
