@@ -89,7 +89,8 @@ export default function PromptBar({
           onClick={onSubmit}
           loadingText={"Producing Spell..."}
         >
-          Send My Wish
+          <span className="hidden md:inline">Send My Wish</span>
+          <span className="inline md:hidden">Send</span>
         </Button>
       </form>
       <Modal

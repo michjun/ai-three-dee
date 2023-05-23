@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { NextReactP5Wrapper } from "@p5-wrapper/next";
 
-export default function Preview({ previewObjects }) {
+export default function Preview({ canvasSize, previewObjects }) {
   const sketchRef = useRef("");
   // Hacky way to trigger rerender
   const [index, setIndex] = useState(0);
@@ -22,8 +22,7 @@ export default function Preview({ previewObjects }) {
 
     // Create a new p5.js sketch function using the provided code
     const sketch = (p) => {
-      let canvasSize = 800;
-      let unit = maxScale > 5 ? (0.4 * canvasSize) / maxScale : 100;
+      let unit = maxScale > 5 ? (0.4 * canvasSize) / maxScale : canvasSize / 8;
       let angleY = 0;
       let angleX = 0;
 
@@ -85,7 +84,7 @@ export default function Preview({ previewObjects }) {
 
     sketchRef.current = sketch;
     setIndex(index + 1);
-  }, [previewObjects]);
+  }, [previewObjects, canvasSize]);
 
   return (
     <NextReactP5Wrapper

@@ -6,7 +6,7 @@ import Button from "@/components/shared/Button";
 import HeaderLogo from "@/components/HeaderLogo";
 import Modal from "@/components/shared/Modal";
 
-export default function Gallery() {
+export default function Gallery({ canvasSize }) {
   const mainRef = useRef();
   const router = useRouter();
 
@@ -110,17 +110,23 @@ export default function Gallery() {
 
   return (
     <div
-      className="flex justify-center items-center h-screen"
+      className="flex justify-center items-center h-full"
       ref={mainRef}
       onKeyUp={handleKeyUp}
       tabIndex={0}
     >
-      <div className="w-[808px] h-full border-l-4 border-r-4 border-amber-200 bg-black">
+      <div
+        className="h-full border-l-4 border-r-4 border-amber-200 bg-black"
+        style={{ width: canvasSize + 8 }}
+      >
         <div className="h-16 pl-2 pr-2 border-b-2 border-neutral-600 flex justify-between">
           <div>
             <HeaderLogo />
-            <div className="pl-2 align-middle font-extrabold text-white text-xl inline-block">
+            <div className="pl-2 align-middle font-extrabold text-white text-xl hidden md:inline-block">
               3DGenie's Showroom
+            </div>
+            <div className="pl-2 align-middle font-extrabold text-white text-xl inline-block md:hidden">
+              Showroom
             </div>
           </div>
           <div className="pt-3 pr-1">
@@ -128,7 +134,7 @@ export default function Gallery() {
           </div>
         </div>
         <div className="h-[calc(100%-8rem)] overflow-scroll">
-          <Preview previewObjects={preview} />
+          <Preview canvasSize={canvasSize} previewObjects={preview} />
         </div>
         <div className="h-16 flex justify-between w-full items-center pl-2.5 box-border bottom-0 border-0 border-t-2 border-neutral-600">
           <Button disabled={!previous} onClick={showPrevious}>

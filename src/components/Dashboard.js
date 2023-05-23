@@ -6,7 +6,7 @@ import CreationData from "@/models/CreationData";
 import Modal from "@/components/shared/Modal";
 import HeaderLogo from "@/components/HeaderLogo";
 
-export default function Dashboard() {
+export default function Dashboard({ canvasSize }) {
   const [creation, setCreation] = useState(new CreationData());
   const [preview, setPreview] = useState([]);
   const [contentSaved, setContentSaved] = useState(true);
@@ -114,8 +114,11 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="flex justify-center items-center h-screen">
-      <div className="w-[808px] h-full border-l-4 border-r-4 border-amber-200 bg-black">
+    <div className="flex justify-center items-center h-full">
+      <div
+        style={{ width: canvasSize + 8 }}
+        className="h-full border-l-4 border-r-4 border-amber-200 bg-black"
+      >
         <div className="h-16 flex pl-2 pr-2 border-b-2 border-neutral-600">
           <HeaderLogo />
           <PromptBar
@@ -127,7 +130,7 @@ export default function Dashboard() {
           />
         </div>
         <div className="h-[calc(100%-8rem)]">
-          <Preview previewObjects={preview} />
+          <Preview canvasSize={canvasSize} previewObjects={preview} />
         </div>
         <ActionBar
           creation={creation}

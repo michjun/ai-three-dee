@@ -18,7 +18,7 @@ const Modal = ({ isOpen, onClose, imgSrc, easeIn = false, children }) => {
   return (
     <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-40">
       <div
-        className={`relative bg-amber-100 rounded p-6 w-full max-w-lg ${
+        className={`relative bg-amber-100 rounded p-6 w-full m-3 max-w-lg max-h-full overflow-scroll ${
           easeIn
             ? `transition-opacity duration-1000 ease-in ${opacityClass}`
             : ""
