@@ -33,7 +33,7 @@ const Modal = ({ isOpen, onClose, imgSrc, easeIn = false, children }) => {
         <div className="w-full p-4">
           {imgSrc && (
             <img
-              className="h-full inline-block rounded-sm mb-4"
+              className="w-full inline-block rounded-sm mb-4"
               src={imgSrc}
               alt="modalAvatar"
             />
