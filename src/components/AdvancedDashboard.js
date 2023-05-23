@@ -13,8 +13,24 @@ export default function AdvancedDashboard() {
   const [contentSaved, setContentSaved] = useState(true);
   const [refreshPreview, setRefreshPreview] = useState(false);
   const [refreshCreations, setRefreshCreations] = useState(true);
+  const [canvasSize, setCavasSize] = useState();
 
   const selectedStyle = "bg-amber-500";
+
+  useEffect(() => {
+    const handleResize = () => {
+      const canvasSize = Math.min(
+        800,
+        window.innerWidth / 2 - 8,
+        window.innerHeight - 128
+      );
+      setCavasSize(canvasSize);
+    };
+
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   useEffect(() => {
     if (refreshPreview) {
@@ -166,7 +182,7 @@ export default function AdvancedDashboard() {
         </div>
       </div>
       <div className="absolute inset-y-0 right-0 w-1/2 bg-black">
-        <Preview previewObjects={preview} />
+        <Preview canvasSize={canvasSize} previewObjects={preview} />
       </div>
     </div>
   );

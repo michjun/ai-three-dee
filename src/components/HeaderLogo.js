@@ -7,7 +7,7 @@ export default function HeaderLogo({ showTitle = false }) {
         alt="logo"
       />
       {showTitle && (
-        <div className="pl-2 align-middle font-extrabold text-white text-lg hidden lg:inline-block">
+        <div className="pl-2 align-middle font-extrabold text-white text-lg hidden xl:inline-block">
           3DGenie
         </div>
       )}
