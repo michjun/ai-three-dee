@@ -22,6 +22,14 @@ const CreationSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "chatThread",
   },
+  useAsExample: {
+    type: Boolean,
+    default: false,
+  },
+  embedding: {
+    type: [Number],
+    required: false,
+  },
 });
 
 const Creation =

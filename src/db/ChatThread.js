@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import ChatMessageSchema from "src/db/ChatMessage";
+import ChatMessageSchema from "@/db/ChatMessage";
 
 const ChatThreadSchema = new mongoose.Schema({
   title: {

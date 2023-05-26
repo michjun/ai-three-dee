@@ -2,6 +2,8 @@ import { connectToDb } from "@/lib/mongoose";
 import ChatThread from "@/db/ChatThread";
 import { getOpenai } from "@/lib/openai";
 import { maxRefineCount } from "@/lib/constants";
+import Creation from "@/db/Creation";
+import { getEmbedding, cosineSimilarity } from "@/utils/embedding";
 
 const systemPrompt = `
 Given the following list of shapes, return an array that resembles the target object:
@@ -19,82 +21,22 @@ Use the exact shape names given
 If prompt is unrelated to the object, return "Unrelated"
 `;
 
-// TODO: store examples in database
-const examples = [
-  {
-    prompt: "UFO",
-    response: `[
-{name: "Ring", shape: "Donut", position: {x: 0, y: 0, z: 0}, rotation: {x: 1.57, y: 0, z: 0}, scale: {x: 2, y: 2, z: 1.2}},
-{name: "Body", shape: "Ball", position: {x: 0, y: 0, z: 0}, rotation: {x: 0, y: 0, z: 0}, scale: {x: 1.8, y: 1.4, z: 1.8}}
-]`,
-  },
-  {
-    prompt: "House",
-    response: `[
-{name: "Base", shape: "Cube", position: {x: 0, y: 0, z: 0}, rotation: {x: 0, y: 0, z: 0}, scale: {x: 2, y: 1, z: 1.5}},
-{name: "Roof", shape: "Square Pyramid", position: {x: 0, y: 1, z: 0}, rotation: {x: 3.14, y: 0.785, z: 0}, scale: {x: 1.6, y: 1.2, z: 1.6}}
-]`,
-  },
-  {
-    prompt: "Car",
-    response: `[
-{name: "Body", shape: "Cube", position: {x: 0, y: 0, z: 0}, rotation: {x: 0, y: 0, z: 0}, scale: {x: 4.5, y: 1, z: 1.5}},
-{name: "Top", shape: "Cube", position: {x: 0, y: 0.8, z: 0}, rotation: {x: 0, y: 0, z: 0}, scale: {x: 2.5, y: 0.8, z: 1}},
-{name: "Wheel1", shape: "Cylinder", position: {x: -1.25, y: -0.5, z: 0.75}, rotation: {x: 1.58, y: 0, z: 0}, scale: {x: 0.5, y: 0.5, z: 0.5}},
-{name: "Wheel2", shape: "Cylinder", position: {x: -1.25, y: -0.5, z: -0.75}, rotation: {x: 1.58, y: 0, z: 0}, scale: {x: 0.5, y: 0.5, z: 0.5}},
-{name: "Wheel3", shape: "Cylinder", position: {x: 1.25, y: -0.5, z: 0.75}, rotation: {x: 1.58, y: 0, z: 0}, scale: {x: 0.5, y: 0.5, z: 0.5}},
-{name: "Wheel4", shape: "Cylinder", position: {x: 1.25, y: -0.5, z: -0.75}, rotation: {x: 1.58, y: 0, z: 0}, scale: {x: 0.5, y: 0.5, z: 0.5}}
-]`,
-  },
-  {
-    prompt: "Dog",
-    response: `[
-{name: "Body", shape: "Cube", position: {x: 0, y: 0, z: 0}, rotation: {x: 0, y: 0, z: 0}, scale: {x: 1, y: 0.6, z: 2}},
-{name: "Head", shape: "Cube", position: {x: 0, y: 0.6, z: 0.9}, rotation: {x: 0, y: 0, z: 0}, scale: {x: 0.8, y: 0.8, z: 0.8}},
-{name: "Snout", shape: "Cube", position: {x: 0, y: 0.6, z: 1.4}, rotation: {x: 0, y: 0, z: 0}, scale: {x: 0.4, y: 0.4, z: 0.6}},
-{name: "Leg1", shape: "Cube", position: {x: 0.4, y: -0.5, z: 0.8}, rotation: {x: 0, y: 0, z: 0}, scale: {x: 0.3, y: 1, z: 0.3}},
-{name: "Leg2", shape: "Cube", position: {x: 0.4, y: -0.5, z: -0.8}, rotation: {x: 0, y: 0, z: 0}, scale: {x: 0.3, y: 1, z: 0.3}},
-{name: "Leg3", shape: "Cube", position: {x: -0.4, y: -0.5, z: 0.8}, rotation: {x: 0, y: 0, z: 0}, scale: {x: 0.3, y: 1, z: 0.3}},
-{name: "Leg4", shape: "Cube", position: {x: -0.4, y: -0.5, z: -0.8}, rotation: {x: 0, y: 0, z: 0}, scale: {x: 0.3, y: 1, z: 0.3}},
-{name: "Tail", shape: "Cube", position: {x: 0, y: 0.5, z: -1.3}, rotation: {x: 0.8, y: 0, z: 0}, scale: {x: 0.2, y: 1, z: 0.2}},
-{name: "Ear1", shape: "Cube", position: {x: 0.4, y: 1.15, z: 1}, rotation: {x: 3.14, y: 0.3, z: -0.3}, scale: {x: 0.3, y: 0.4, z: 0.1}},
-{name: "Ear2", shape: "Cube", position: {x: -0.4, y: 1.15, z: 1}, rotation: {x: 3.14, y: -0.3, z: 0.3}, scale: {x: 0.3, y: 0.4, z: 0.1}},
-]`,
-  },
-  {
-    prompt: "Bear",
-    response: `[
-{name: "Body", shape: "Ball", position: {x: 0, y: 0, z: -0.09}, rotation: {x: 0, y: 0, z: 0}, scale: {x: 1, y: 0.8, z: 1.4}},
-{name: "Head", shape: "Ball", position: {x: 0, y: 0.6, z: 0.9}, rotation: {x: 0, y: 0, z: 0}, scale: {x: 0.8, y: 0.8, z: 0.8}},
-{name: "Snout", shape: "Ball", position: {x: 0, y: 0.6, z: 1.4}, rotation: {x: 0, y: 0, z: 0}, scale: {x: 0.4, y: 0.4, z: 0.6}},
-{name: "Leg1", shape: "Cylinder", position: {x: 0.4, y: -0.5, z: 0.8}, rotation: {x: 0, y: 0, z: 0}, scale: {x: 0.3, y: 1, z: 0.3}},
-{name: "Leg2", shape: "Cylinder", position: {x: 0.4, y: -0.5, z: -0.8}, rotation: {x: 0, y: 0, z: 0}, scale: {x: 0.3, y: 1, z: 0.3}},
-{name: "Leg3", shape: "Cylinder", position: {x: -0.4, y: -0.5, z: 0.8}, rotation: {x: 0, y: 0, z: 0}, scale: {x: 0.3, y: 1, z: 0.3}},
-{name: "Leg4", shape: "Cylinder", position: {x: -0.4, y: -0.5, z: -0.8}, rotation: {x: 0, y: 0, z: 0}, scale: {x: 0.3, y: 1, z: 0.3}},
-{name: "Tail", shape: "Ball", position: {x: 0, y: 0.5, z: -1.3}, rotation: {x: 0.8, y: 0, z: 0}, scale: {x: 0.2, y: 0.3, z: 0.2}},
-{name: "Ear1", shape: "Ball", position: {x: 0.4, y: 1.15, z: 1}, rotation: {x: 3.14, y: 0.3, z: -0.3}, scale: {x: 0.3, y: 0.4, z: 0.1}},
-{name: "Ear2", shape: "Ball", position: {x: -0.4, y: 1.15, z: 1}, rotation: {x: 3.14, y: -0.3, z: 0.3}, scale: {x: 0.3, y: 0.4, z: 0.1}},
-]`,
-  },
-  {
-    prompt: "Flower",
-    response: `[
-{name: "Stem", shape: "Cylinder", position: {x: 0, y: -1.5, z: -0.55}, rotation: {x: 0, y: 0, z: 0}, scale: {x: 0.1, y: 5.5, z: 0.1}},
-{name: "Disk", shape: "Cylinder", position: {x: 0, y: 1, z: 0}, rotation: {x: 1.57, y: 0, z: 0}, scale: {x: 1, y: 0.2, z: 1}},
-{name: "Heart", shape: "Ball", position: {x: 0, y: 1, z: -0.1}, rotation: {x: 0, y: 0, z: 0}, scale: {x: 0.7, y: 0.7, z: 0.5}},
-{name: "Petal1", shape: "Ball", position: {x: 0, y: 2.5, z: 0.1}, rotation: {x: -0.3, y: 0, z: 0}, scale: {x: 0.8, y: 0.7, z: 0.2}},
-{name: "Petal2", shape: "Ball", position: {x: 1.5, y: 1.4, z: 0.1}, rotation: {x: -0.1, y: -0.3, z: 1.256}, scale: {x: 0.8, y: 0.7, z: 0.2}},
-{name: "Petal3", shape: "Ball", position: {x: 0.9, y: -0.3, z: 0.1}, rotation: {x: 0.3, y: -0.15, z: 2.512}, scale: {x: 0.8, y: 0.7, z: 0.2}},
-{name: "Petal4", shape: "Ball", position: {x: -0.9, y: -0.3, z: 0.1}, rotation: {x: 0.3, y: 0.15, z: -2.512}, scale: {x: 0.8, y: 0.7, z: 0.2}},
-{name: "Petal5", shape: "Ball", position: {x: -1.5, y: 1.3, z: 0.1}, rotation: {x: -0.1, y: 0.3, z: -1.256}, scale: {x: 0.8, y: 0.7, z: 0.2}},
-{name: "Leaf1", shape: "Ball", position: {x: -0.6, y: -1.5, z: -0.5}, rotation: {x: 0, y: 0, z: -0.785}, scale: {x: 0.3, y: 0.9, z: 0.1}},
-{name: "Leaf2", shape: "Ball", position: {x: 0.6, y: -2.2, z: -0.5}, rotation: {x: 0, y: 0, z: 0.785}, scale: {x: 0.3, y: 0.9, z: 0.1}}
-]`,
-  },
-];
-
 function generatePrompt(model) {
   return `Object: ${model}.`;
+}
+
+async function getRelevantExamples(creationDescription) {
+  const creationEmbedding = await getEmbedding(creationDescription);
+  await connectToDb();
+  const examples = await Creation.find({ useAsExample: true });
+  const relevantExamples = examples
+    .map((example) => ({
+      similarity: cosineSimilarity(example.embedding, creationEmbedding),
+      example: example,
+    }))
+    .sort((a, b) => b.similarity - a.similarity)
+    .slice(0, 3); // Hardcoded to 3 examples for now, todo: make this dynamic based on token count
+  return relevantExamples;
 }
 
 export default async function (req, res) {
@@ -108,14 +50,17 @@ export default async function (req, res) {
     return;
   }
 
+  const examples = await getRelevantExamples(creationDescription);
+
   const messages = [{ role: "system", content: systemPrompt }].concat(
     examples
-      .map((example) => [
-        { role: "user", content: generatePrompt(example.prompt) },
-        { role: "assistant", content: example.response },
+      .map(({ example }) => [
+        { role: "user", content: generatePrompt(example.title) },
+        { role: "assistant", content: example.content },
       ])
       .flat()
   );
+  console.log(messages);
   messages.push({ role: "user", content: generatePrompt(creationDescription) });
 
   try {

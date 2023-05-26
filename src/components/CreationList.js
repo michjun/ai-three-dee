@@ -24,7 +24,8 @@ export default function CreationList({
                   creation.content,
                   creation.chatThread,
                   0,
-                  creation._id
+                  creation._id,
+                  creation.useAsExample
                 )
             )
         );

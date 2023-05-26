@@ -1,11 +1,11 @@
 import { connectToDb } from "@/lib/mongoose";
-import Creation from "src/db/Creation";
+import Creation from "@/db/Creation";
 
 export default async function (req, res) {
   await connectToDb();
   if (req.method === "GET") {
     try {
-      const creations = await Creation.find({});
+      const creations = await Creation.find({}).select("-embedding");
       res.status(200).json({ success: true, data: creations });
     } catch (error) {
       console.log(error);

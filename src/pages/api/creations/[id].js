@@ -1,18 +1,20 @@
 import { connectToDb } from "@/lib/mongoose";
-import Creation from "src/db/Creation";
+import Creation from "@/db/Creation";
 
 export default async function (req, res) {
   await connectToDb();
   if (req.method === "GET") {
     const { id } = req.query;
     try {
-      const creation = await Creation.findById(id);
+      const creation = await Creation.findById(id).select("-embedding");
       const prevCreation = await Creation.find({ _id: { $lt: id } })
         .sort({ _id: -1 })
-        .limit(1);
+        .limit(1)
+        .select("_id");
       const nextCreation = await Creation.find({ _id: { $gt: id } })
         .sort({ _id: 1 })
-        .limit(1);
+        .limit(1)
+        .select("_id");
 
       res.status(200).json({
         success: true,

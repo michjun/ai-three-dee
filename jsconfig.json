@@ -5,7 +5,8 @@
       "@/components/*": ["src/components/*"],
       "@/lib/*": ["src/lib/*"],
       "@/db/*": ["src/db/*"],
-      "@/models/*": ["src/models/*"]
+      "@/models/*": ["src/models/*"],
+      "@/utils/*": ["src/utils/*"]
     }
   }
 }

@@ -6,6 +6,8 @@ import CreationData from "@/models/CreationData";
 import { availableActions } from "@/components/ActionBar";
 import ActionBar from "@/components/ActionBar";
 import HeaderLogo from "@/components/HeaderLogo";
+import { MdContentCopy } from "react-icons/md";
+import { IconContext } from "react-icons";
 
 export default function AdvancedDashboard() {
   const [creation, setCreation] = useState(new CreationData());
@@ -83,10 +85,22 @@ export default function AdvancedDashboard() {
         }`}
       >
         <a
-          className="block w-full p-2.5"
+          className="block w-full p-2.5 flex justify-between items-center"
           onClick={(e) => setCreationAndRefreshView(item)}
         >
-          {item.title}
+          <div className={item.example ? "text-yellow-300" : ""}>
+            {item.title}
+          </div>
+          <div
+            className="text-white w-4 pr-1"
+            onClick={async (e) => {
+              e.stopPropagation();
+              await navigator.clipboard.writeText(item.id);
+              alert("ID copied to clipboard!");
+            }}
+          >
+            <MdContentCopy />
+          </div>
         </a>
       </li>
     );

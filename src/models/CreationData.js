@@ -4,13 +4,15 @@ export default class CreationData {
     content = null,
     threadId = null,
     refinesLeft = 0,
-    id = null
+    id = null,
+    example = false
   ) {
     this.title = title;
     this.content = content;
     this.threadId = threadId;
     this.refinesLeft = refinesLeft;
     this.id = id;
+    this.example = example;
   }
 
   contentToJson() {
