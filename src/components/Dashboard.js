@@ -6,6 +6,7 @@ import CreationData from "@/models/CreationData";
 import Modal from "@/components/shared/Modal";
 import HeaderLogo from "@/components/HeaderLogo";
 import { isJsonString, creationContentToJson } from "@/utils/json";
+import CopyForm from "@/components/shared/CopyForm";
 
 export default function Dashboard({ canvasSize }) {
   const [creation, setCreation] = useState(new CreationData({}));
@@ -13,6 +14,7 @@ export default function Dashboard({ canvasSize }) {
   const [stream, setStream] = useState();
   const [contentSaved, setContentSaved] = useState(true);
   const [showWelcomeMsg, setShowWelcomeMsg] = useState(false);
+  const [shareLink, setShareLink] = useState();
 
   useEffect(() => {
     const welcomeMsgSeen = window.localStorage.getItem("welcomeMsgSeen");
@@ -44,12 +46,7 @@ export default function Dashboard({ canvasSize }) {
       creationId = await saveCreation();
     }
     if (creationId) {
-      await navigator.clipboard.writeText(
-        `${process.env.NEXT_PUBLIC_HOST_URL}/gallery/${creationId}`
-      );
-      alert("Share link copied to clipboard!");
-    } else {
-      alert("Sorry, something is wrong");
+      setShareLink(`${process.env.NEXT_PUBLIC_HOST_URL}/gallery/${creationId}`);
     }
   }
 
@@ -140,6 +137,18 @@ export default function Dashboard({ canvasSize }) {
           and call, I am, ready to sprinkle a dash of fun on your day! Step
           right in, and may your journey be filled with marvels!
         </div>
+      </Modal>
+      <Modal
+        isOpen={shareLink}
+        imgSrc="/genie2.png"
+        onClose={() => setShareLink(null)}
+      >
+        <div className="text-center mb-2.5">
+          Ah, a splendid creation you wish to share with the world, I see! By my
+          lamp, grasp this magic link below and spread your masterpiece far and
+          wide!
+        </div>
+        <CopyForm defaultText={shareLink} />
       </Modal>
     </div>
   );
