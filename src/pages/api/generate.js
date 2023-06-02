@@ -107,6 +107,7 @@ export default async function (req, res) {
           if (newTokens) {
             fullResults += newTokens;
             res.write(`data: ${JSON.stringify({ tokens: newTokens })}\n\n`);
+            res.flush();
           }
           if (fullResults === "Unrelated") {
             throw new Error("Unrelated");
