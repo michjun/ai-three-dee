@@ -140,7 +140,7 @@ export default function Preview({ canvasSize, previewObjects, streamObjects }) {
           p.background(
             215 + p.frameCount * 2,
             155 + p.frameCount * 5,
-            215 + p.frameCount * 2
+            235 + p.frameCount
           );
         } else {
           if (p.frameCount < 80 && streamObjects.length > 0) {
