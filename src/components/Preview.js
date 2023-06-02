@@ -87,7 +87,7 @@ export default function Preview({ canvasSize, previewObjects, streamObjects }) {
 
       p.touchMoved = () => {
         targetAngleY = p.map(p.mouseX, 0, p.width, -p.PI * 1.2, p.PI * 1.2);
-        targetAngleX = p.map(p.mouseY, 0, p.height, p.PI / 4, -p.PI / 4);
+        targetAngleX = p.map(p.mouseY, 0, p.height, p.PI / 2, -p.PI / 2);
         return false;
       };
 
