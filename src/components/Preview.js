@@ -137,7 +137,11 @@ export default function Preview({ canvasSize, previewObjects, streamObjects }) {
         // Add a flashing effect in the beginning to ease
         // out the jumpy transition when new objects are added
         if (p.frameCount < 20 && streamObjects.length > 0) {
-          p.background(255);
+          p.background(
+            215 + p.frameCount * 2,
+            155 + p.frameCount * 5,
+            215 + p.frameCount * 2
+          );
         } else {
           if (p.frameCount < 80 && streamObjects.length > 0) {
             let initialColor = p.color(255);

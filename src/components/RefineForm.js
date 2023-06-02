@@ -32,19 +32,23 @@ export default function RefineForm({
           new Error(`Request failed with status ${response.status}`)
         );
       }
-      creation.threadId = data.threadId;
-      creation.refinesLeft = data.refinesLeft;
-      // Sometimes ChatGPT returns extra text before the actual result,
-      // so trim everything before the first "[" character
-      const content = data.result.content;
+      const { refinesLeft } = data;
+      let content = data.result.content;
       if (content === "Unrelated") {
-        onCreationChange(new CreationData(creation));
+        onCreationChange(new CreationData({ ...creation, refinesLeft }));
         alert(
           "Ah, a twist in the cosmic tale! Your wish, dear friend, is beyond my mystical reach. Please, bestow upon me another request!"
         );
       } else {
-        creation.content = content.slice(content.indexOf("["));
-        onCreationChange(new CreationData(creation));
+        // Sometimes ChatGPT returns extra text before the actual result,
+        // so trim everything before the first "[" character
+        onCreationChange(
+          new CreationData({
+            ...creation,
+            refinesLeft,
+            content: content.slice(content.indexOf("[")),
+          })
+        );
       }
       onComplete();
     } catch (error) {

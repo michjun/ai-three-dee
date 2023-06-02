@@ -65,8 +65,8 @@ export default function Dashboard({ canvasSize }) {
   }
 
   function onPromptChange(event) {
-    creation.title = event.target.value;
-    setCreation(new CreationData(creation));
+    const title = event.target.value;
+    setCreation(new CreationData({ ...creation, title }));
   }
 
   function updateStream(stream) {

@@ -75,7 +75,7 @@ export default function PromptBar({
         onCreationChange(
           new CreationData({ title, content, threadId, refinesLeft })
         );
-      }, 2500);
+      }, 2000);
     } catch (error) {
       setShowWaitMessage(false);
       clearTimeout(waitMsgTimeout);

@@ -67,13 +67,13 @@ export default function AdvancedDashboard() {
   }
 
   function onPromptChange(event) {
-    creation.title = event.target.value;
-    setCreation(new CreationData(creation));
+    const title = event.target.value;
+    setCreation(new CreationData({ ...creation, title }));
   }
 
   function onContentChange(event) {
-    creation.content = event.target.value;
-    setCreation(new CreationData(creation));
+    const content = event.target.value;
+    setCreation(new CreationData({ ...creation, content }));
     setContentSaved(false);
   }
 
