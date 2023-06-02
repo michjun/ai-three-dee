@@ -65,7 +65,6 @@ export default function PromptBar({
     }, 60000);
 
     try {
-      updateStream("");
       const { result, threadId, refineCount } = await connectAIStream();
       setShowWaitMessage(false);
       clearTimeout(waitMsgTimeout);
@@ -73,6 +72,7 @@ export default function PromptBar({
     } catch (error) {
       setShowWaitMessage(false);
       clearTimeout(waitMsgTimeout);
+      onCreationChange(new CreationData(prompt));
       console.error(error);
       alert(
         "Ah, a twist in the cosmic tale! Your wish, dear friend, is beyond my mystical reach. Please, bestow upon me another request!"
