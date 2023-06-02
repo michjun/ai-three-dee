@@ -11,7 +11,7 @@ export default function Gallery({ canvasSize }) {
   const router = useRouter();
 
   const [creationId, setCreationId] = useState(null);
-  const [creation, setCreation] = useState(new CreationData());
+  const [creation, setCreation] = useState(new CreationData({}));
   const [preview, setPreview] = useState([]);
   const [previous, setPrevious] = useState(null);
   const [next, setNext] = useState(null);
@@ -39,15 +39,7 @@ export default function Gallery({ canvasSize }) {
       try {
         const response = await fetch(`/api/creations/${creationId}`);
         const data = (await response.json()).data;
-        setCreation(
-          new CreationData(
-            data.creation.title,
-            data.creation.content,
-            data.creation.chatThread,
-            0,
-            data.creation._id
-          )
-        );
+        setCreation(new CreationData(data.creation));
         setPrevious(data.prevId);
         setNext(data.nextId);
         mainRef.current.focus();

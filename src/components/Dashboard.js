@@ -8,11 +8,10 @@ import HeaderLogo from "@/components/HeaderLogo";
 import { isJsonString, creationContentToJson } from "@/utils/json";
 
 export default function Dashboard({ canvasSize }) {
-  const [creation, setCreation] = useState(new CreationData());
+  const [creation, setCreation] = useState(new CreationData({}));
   const [preview, setPreview] = useState([]);
   const [stream, setStream] = useState();
   const [contentSaved, setContentSaved] = useState(true);
-  const [refreshPreview, setRefreshPreview] = useState(false);
   const [showWelcomeMsg, setShowWelcomeMsg] = useState(false);
 
   useEffect(() => {
@@ -24,50 +23,23 @@ export default function Dashboard({ canvasSize }) {
     }
   }, []);
 
-  useEffect(() => {
-    if (refreshPreview) {
-      showPreview();
-      setRefreshPreview(false);
-    }
-  }, [refreshPreview]);
-
   async function saveCreation() {
-    const { errors } = creation.validate();
-    if (errors.length > 0) {
-      return alert(errors.join("\n"));
-    }
     try {
-      const response = await fetch("/api/creations", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          title: creation.title,
-          content: creation.content,
-          chatThread: creation.threadId,
-        }),
-      });
-      const data = (await response.json()).data;
-      setCreation(
-        new CreationData(
-          data.title,
-          data.content,
-          data.chatThread,
-          creation.refinesLeft,
-          data._id
-        )
-      );
+      const { data, errors } = await creation.save();
+      if (errors) {
+        return alert(errors.join("\n"));
+      }
+      setCreation(new CreationData(data));
       setContentSaved(true);
       return data._id;
     } catch (error) {
-      console.error("Error parsing the input string:", error);
+      console.error("Error saving creation:", error);
       alert("Sorry, something is wrong");
     }
   }
 
   async function shareCreation() {
-    let creationId = creation.id;
+    let creationId = creation._id;
     if (!creationId || !contentSaved) {
       creationId = await saveCreation();
     }
@@ -81,10 +53,9 @@ export default function Dashboard({ canvasSize }) {
     }
   }
 
-  function showPreview() {
+  function showPreview(content) {
     try {
-      const jsonString = creation.contentToJson();
-      setPreview(jsonString ? JSON.parse(jsonString) : []);
+      setPreview(content ? JSON.parse(content) : []);
     } catch (error) {
       console.error("Error parsing the input string:", error);
       alert(
@@ -94,16 +65,10 @@ export default function Dashboard({ canvasSize }) {
   }
 
   function onPromptChange(event) {
-    setCreation(
-      new CreationData(
-        event.target.value,
-        creation.content,
-        creation.threadId,
-        creation.refinesLeft,
-        creation.id
-      )
-    );
+    creation.title = event.target.value;
+    setCreation(new CreationData(creation));
   }
+
   function updateStream(stream) {
     const jsonStream = creationContentToJson(stream + "]");
     if (isJsonString(jsonStream)) {
@@ -115,12 +80,8 @@ export default function Dashboard({ canvasSize }) {
 
   function setCreationAndRefreshView(creation) {
     setCreation(creation);
-    setRefreshPreview(true);
-    if (creation.id) {
-      setContentSaved(true);
-    } else {
-      setContentSaved(false);
-    }
+    showPreview(creation.contentToJson());
+    setContentSaved(creation._id ? true : false);
   }
 
   return (

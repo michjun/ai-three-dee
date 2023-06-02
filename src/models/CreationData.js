@@ -1,19 +1,19 @@
 import { creationContentToJson } from "@/utils/json";
 export default class CreationData {
-  constructor(
+  constructor({
     title = null,
     content = null,
     threadId = null,
     refinesLeft = 0,
-    id = null,
-    example = false
-  ) {
+    _id = null,
+    useAsExample = false,
+  }) {
     this.title = title;
     this.content = content;
     this.threadId = threadId;
     this.refinesLeft = refinesLeft;
-    this.id = id;
-    this.example = example;
+    this._id = _id;
+    this.useAsExample = useAsExample;
   }
 
   contentToJson() {
@@ -29,5 +29,26 @@ export default class CreationData {
       errors.push("Please generate a 3d model creation first.");
     }
     return { errors };
+  }
+
+  async save() {
+    const { errors } = this.validate();
+    if (errors.length > 0) {
+      return { errors };
+    }
+
+    const response = await fetch("/api/creations", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        title: this.title,
+        content: this.content,
+        chatThread: this.threadId,
+      }),
+    });
+    const data = (await response.json()).data;
+    return { data };
   }
 }

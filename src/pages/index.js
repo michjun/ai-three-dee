@@ -5,7 +5,7 @@ import { useRef, useEffect, useState } from "react";
 export default function Home() {
   const container = useRef();
   const bgStyle = { backgroundImage: `url('/magic3.png')` };
-  const [canvasSize, setCavasSize] = useState();
+  const [canvasSize, setCanvasSize] = useState();
 
   useEffect(() => {
     const handleResize = () => {
@@ -15,7 +15,7 @@ export default function Home() {
         window.innerWidth - 8,
         window.innerHeight - 128
       );
-      setCavasSize(canvasSize);
+      setCanvasSize(canvasSize);
     };
 
     handleResize();

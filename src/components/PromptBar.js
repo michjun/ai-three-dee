@@ -22,13 +22,13 @@ export default function PromptBar({
         }/api/generate?model=${encodeURIComponent(prompt)}`
       );
       let done = false;
-      let result = "";
+      let content = "";
       eventSource.onmessage = (event) => {
         const data = event.data;
         if (done) {
-          const { threadId, refineCount } = JSON.parse(data);
+          const { threadId, refinesLeft } = JSON.parse(data);
           eventSource.close();
-          resolve({ result, threadId, refineCount });
+          resolve({ content, threadId, refinesLeft });
         }
         if (data === "[DONE]") {
           done = true;
@@ -36,8 +36,9 @@ export default function PromptBar({
           eventSource.close();
           reject();
         } else {
-          result += data;
-          updateStream(result);
+          const { tokens } = JSON.parse(data);
+          content += tokens;
+          updateStream(content);
         }
       };
       eventSource.onerror = (event) => {
@@ -64,15 +65,18 @@ export default function PromptBar({
       setShowWaitMessage(true);
     }, 60000);
 
+    const title = prompt;
     try {
-      const { result, threadId, refineCount } = await connectAIStream();
+      const { content, threadId, refinesLeft } = await connectAIStream();
       setShowWaitMessage(false);
       clearTimeout(waitMsgTimeout);
-      onCreationChange(new CreationData(prompt, result, threadId, refineCount));
+      onCreationChange(
+        new CreationData({ title, content, threadId, refinesLeft })
+      );
     } catch (error) {
       setShowWaitMessage(false);
       clearTimeout(waitMsgTimeout);
-      onCreationChange(new CreationData(prompt));
+      onCreationChange(new CreationData({ title }));
       console.error(error);
       alert(
         "Ah, a twist in the cosmic tale! Your wish, dear friend, is beyond my mystical reach. Please, bestow upon me another request!"

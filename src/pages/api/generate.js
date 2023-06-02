@@ -95,7 +95,7 @@ export default async function (req, res) {
             });
             const endingData = {
               threadId: thread._id,
-              refineCount: maxRefineCount - thread.refineCount,
+              refinesLeft: maxRefineCount - thread.refineCount,
             };
             res.write(`data: [DONE]\n\n`);
             res.write(`data: ${JSON.stringify(endingData)}\n\n`);
@@ -106,7 +106,7 @@ export default async function (req, res) {
           const newTokens = choices[0].delta.content;
           if (newTokens) {
             fullResults += newTokens;
-            res.write(`data: ${newTokens}\n\n`);
+            res.write(`data: ${JSON.stringify({ tokens: newTokens })}\n\n`);
           }
           if (fullResults === "Unrelated") {
             throw new Error("Unrelated");

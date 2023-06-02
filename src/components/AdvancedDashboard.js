@@ -10,13 +10,13 @@ import { MdContentCopy } from "react-icons/md";
 import { isJsonString, creationContentToJson } from "@/utils/json";
 
 export default function AdvancedDashboard() {
-  const [creation, setCreation] = useState(new CreationData());
+  const [creation, setCreation] = useState(new CreationData({}));
   const [preview, setPreview] = useState([]);
   const [stream, setStream] = useState();
   const [contentSaved, setContentSaved] = useState(true);
   const [refreshPreview, setRefreshPreview] = useState(false);
   const [refreshCreations, setRefreshCreations] = useState(true);
-  const [canvasSize, setCavasSize] = useState();
+  const [canvasSize, setCanvasSize] = useState();
 
   const selectedStyle = "bg-amber-500";
 
@@ -27,7 +27,7 @@ export default function AdvancedDashboard() {
         window.innerWidth / 2 - 8,
         window.innerHeight - 128
       );
-      setCavasSize(canvasSize);
+      setCanvasSize(canvasSize);
     };
 
     handleResize();
@@ -43,36 +43,16 @@ export default function AdvancedDashboard() {
   }, [refreshPreview]);
 
   async function saveCreation() {
-    const { errors } = creation.validate();
-    if (errors.length > 0) {
-      return alert(errors.join("\n"));
-    }
     try {
-      const response = await fetch("/api/creations", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          title: creation.title,
-          content: creation.content,
-          chatThread: creation.threadId,
-        }),
-      });
-      const data = (await response.json()).data;
-      setCreation(
-        new CreationData(
-          data.title,
-          data.content,
-          data.chatThread,
-          creation.refinesLeft,
-          data._id
-        )
-      );
+      const { data, errors } = await creation.save();
+      if (errors) {
+        return alert(errors.join("\n"));
+      }
+      setCreation(new CreationData(data));
       setRefreshCreations(true);
       setContentSaved(true);
     } catch (error) {
-      console.error("Error parsing the input string:", error);
+      console.error("Error saving creation:", error);
       alert("invalid data");
     }
   }
@@ -90,27 +70,13 @@ export default function AdvancedDashboard() {
   }
 
   function onPromptChange(event) {
-    setCreation(
-      new CreationData(
-        event.target.value,
-        creation.content,
-        creation.threadId,
-        creation.refinesLeft,
-        creation.id
-      )
-    );
+    creation.title = event.target.value;
+    setCreation(new CreationData(creation));
   }
 
   function onContentChange(event) {
-    setCreation(
-      new CreationData(
-        creation.title,
-        event.target.value,
-        creation.threadId,
-        creation.refinesLeft,
-        creation.id
-      )
-    );
+    creation.content = event.target.value;
+    setCreation(new CreationData(creation));
     setContentSaved(false);
   }
 
@@ -126,33 +92,29 @@ export default function AdvancedDashboard() {
   function setCreationAndRefreshView(creation) {
     setCreation(creation);
     setRefreshPreview(true);
-    if (creation.id) {
-      setContentSaved(true);
-    } else {
-      setContentSaved(false);
-    }
+    setContentSaved(creation._id ? true : false);
   }
 
   function creationListItem(item) {
     return (
       <li
-        key={item.id}
+        key={item._id}
         className={`text-white cursor-pointer border-b border-neutral-300 ${
-          item.id === creation.id ? selectedStyle : ""
+          item._id === creation._id ? selectedStyle : ""
         }`}
       >
         <a
           className="block w-full p-2.5 flex justify-between items-center"
           onClick={(e) => setCreationAndRefreshView(item)}
         >
-          <div className={item.example ? "text-yellow-300" : ""}>
+          <div className={item.useAsExample ? "text-yellow-300" : ""}>
             {item.title}
           </div>
           <div
             className="text-white w-4 pr-1"
             onClick={async (e) => {
               e.stopPropagation();
-              await navigator.clipboard.writeText(item.id);
+              await navigator.clipboard.writeText(item._id);
               alert("ID copied to clipboard!");
             }}
           >
@@ -206,7 +168,7 @@ export default function AdvancedDashboard() {
           />
         </div>
       </div>
-      <div className="absolute inset-y-0 right-0 w-1/2 bg-black">
+      <div className="absolute inset-y-0 right-0 w-1/2 bg-black pl-1">
         <Preview
           canvasSize={canvasSize}
           previewObjects={preview}

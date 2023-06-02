@@ -15,19 +15,7 @@ export default function CreationList({
         const response = await fetch("/api/creations");
         const data = (await response.json()).data;
         setCreations(
-          data
-            .reverse()
-            .map(
-              (creation) =>
-                new CreationData(
-                  creation.title,
-                  creation.content,
-                  creation.chatThread,
-                  0,
-                  creation._id,
-                  creation.useAsExample
-                )
-            )
+          data.reverse().map((creation) => new CreationData(creation))
         );
         if (onRefreshComplete) {
           onRefreshComplete();
