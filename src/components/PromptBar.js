@@ -70,9 +70,12 @@ export default function PromptBar({
       const { content, threadId, refinesLeft } = await connectAIStream();
       setShowWaitMessage(false);
       clearTimeout(waitMsgTimeout);
-      onCreationChange(
-        new CreationData({ title, content, threadId, refinesLeft })
-      );
+      // let the animation finish before we switch to the complete view
+      setTimeout(() => {
+        onCreationChange(
+          new CreationData({ title, content, threadId, refinesLeft })
+        );
+      }, 2500);
     } catch (error) {
       setShowWaitMessage(false);
       clearTimeout(waitMsgTimeout);
@@ -100,7 +103,7 @@ export default function PromptBar({
           disabled={!prompt}
           className="mr-2.5"
           onClick={onSubmit}
-          loadingText={"Producing Spell..."}
+          loadingText={"Working..."}
         >
           <span className="hidden md:inline">Send My Wish</span>
           <span className="inline md:hidden">Send</span>

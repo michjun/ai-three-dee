@@ -22,12 +22,9 @@ export default function AdvancedDashboard() {
 
   useEffect(() => {
     const handleResize = () => {
-      const canvasSize = Math.min(
-        800,
-        window.innerWidth / 2 - 8,
-        window.innerHeight - 128
-      );
-      setCanvasSize(canvasSize);
+      const width = Math.min(800, window.innerWidth / 2 - 2);
+      const height = window.innerHeight;
+      setCanvasSize({ width, height });
     };
 
     handleResize();
@@ -168,7 +165,7 @@ export default function AdvancedDashboard() {
           />
         </div>
       </div>
-      <div className="absolute inset-y-0 right-0 w-1/2 bg-black pl-1">
+      <div className="absolute inset-y-0 right-0 w-1/2 bg-black pl-0.5">
         <Preview
           canvasSize={canvasSize}
           previewObjects={preview}

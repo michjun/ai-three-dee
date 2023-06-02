@@ -87,7 +87,7 @@ export default function Dashboard({ canvasSize }) {
   return (
     <div className="flex justify-center items-center h-full">
       <div
-        style={{ width: canvasSize + 8 }}
+        style={{ width: (canvasSize?.width || 800) + 8 }}
         className="h-full border-l-4 border-r-4 border-amber-200 bg-black"
       >
         <div className="h-16 flex pl-2 pr-2 border-b-2 border-neutral-600">

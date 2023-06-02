@@ -10,12 +10,9 @@ export default function Home() {
   useEffect(() => {
     const handleResize = () => {
       container.current.style.height = `${window.innerHeight}px`;
-      const canvasSize = Math.min(
-        800,
-        window.innerWidth - 8,
-        window.innerHeight - 128
-      );
-      setCanvasSize(canvasSize);
+      const width = Math.min(800, window.innerWidth - 8);
+      const height = window.innerHeight - 128;
+      setCanvasSize({ width, height });
     };
 
     handleResize();

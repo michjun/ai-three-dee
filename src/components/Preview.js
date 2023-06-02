@@ -17,7 +17,8 @@ export default function Preview({ canvasSize, previewObjects, streamObjects }) {
       maxY = Math.max(maxY, py);
       minY = Math.min(minY, py);
     });
-    const unit = maxScale > 5 ? (0.4 * canvasSize) / maxScale : canvasSize / 8;
+    const unit =
+      maxScale > 5 ? (0.4 * canvasSize.width) / maxScale : canvasSize.width / 8;
     return { maxY, minY, unit };
   }
 
@@ -56,7 +57,7 @@ export default function Preview({ canvasSize, previewObjects, streamObjects }) {
   }
 
   useEffect(() => {
-    if (!previewObjects) return;
+    if (!previewObjects || !canvasSize) return;
 
     const { maxY, minY, unit } = defineScale(previewObjects);
 
@@ -75,7 +76,7 @@ export default function Preview({ canvasSize, previewObjects, streamObjects }) {
       };
 
       p.setup = () => {
-        p.createCanvas(canvasSize, canvasSize, p.WEBGL);
+        p.createCanvas(canvasSize.width, canvasSize.height, p.WEBGL);
       };
 
       p.draw = () => {
@@ -88,6 +89,7 @@ export default function Preview({ canvasSize, previewObjects, streamObjects }) {
         p.rotateX(angleX);
         p.translate(0, ((maxY + minY) * unit) / 2, 0);
         p.noStroke();
+        p.fill(255, 215, 0);
         drawObjects(previewObjects);
         p.pop();
 
@@ -120,7 +122,7 @@ export default function Preview({ canvasSize, previewObjects, streamObjects }) {
       };
 
       p.setup = () => {
-        p.createCanvas(canvasSize, canvasSize, p.WEBGL);
+        p.createCanvas(canvasSize.width, canvasSize.height, p.WEBGL);
       };
 
       p.draw = () => {

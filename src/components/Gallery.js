@@ -109,7 +109,7 @@ export default function Gallery({ canvasSize }) {
     >
       <div
         className="h-full border-l-4 border-r-4 border-amber-200 bg-black"
-        style={{ width: canvasSize + 8 }}
+        style={{ width: (canvasSize?.width || 800) + 8 }}
       >
         <div className="h-16 pl-2 pr-2 border-b-2 border-neutral-600 flex justify-between">
           <div>
