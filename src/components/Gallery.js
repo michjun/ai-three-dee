@@ -125,7 +125,7 @@ export default function Gallery({ canvasSize }) {
             <Button onClick={goToHome}>Start Creating &raquo;</Button>
           </div>
         </div>
-        <div className="h-[calc(100%-8rem)] overflow-scroll">
+        <div className="h-[calc(100%-8rem)]">
           <Preview canvasSize={canvasSize} previewObjects={preview} />
         </div>
         <div className="h-16 flex justify-between w-full items-center pl-2.5 box-border bottom-0 border-0 border-t-2 border-neutral-600">

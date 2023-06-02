@@ -101,7 +101,7 @@ export default function Dashboard({ canvasSize }) {
             className="grow border-0 bg-black pt-2"
           />
         </div>
-        <div className="h-[calc(100%-8rem)]">
+        <div className="h-[calc(100%-8rem)] overflow-scroll">
           <Preview
             canvasSize={canvasSize}
             previewObjects={preview}

@@ -65,6 +65,7 @@ export default function Preview({ canvasSize, previewObjects, streamObjects }) {
     const sketch = (p) => {
       let angleY = 0;
       let angleX = 0;
+      let targetAngleX, targetAngleY;
 
       const drawObjects = (objects) => {
         for (let obj of objects) {
@@ -79,22 +80,34 @@ export default function Preview({ canvasSize, previewObjects, streamObjects }) {
         p.createCanvas(canvasSize.width, canvasSize.height, p.WEBGL);
       };
 
+      p.mouseMoved = () => {
+        targetAngleY = p.map(p.mouseX, 0, p.width, -p.PI * 1.2, p.PI * 1.2);
+        targetAngleX = p.map(p.mouseY, 0, p.height, p.PI / 4, -p.PI / 4);
+      };
+
+      p.touchMoved = () => {
+        targetAngleY = p.map(p.mouseX, 0, p.width, -p.PI * 1.2, p.PI * 1.2);
+        targetAngleX = p.map(p.mouseY, 0, p.height, p.PI / 4, -p.PI / 4);
+      };
+
       p.draw = () => {
         p.background(0);
         p.ambientLight(100);
         p.pointLight(255, 255, 255, 0, -200, 300);
 
+        // Only update the angles if the mouse has moved
+        if (targetAngleX !== undefined && targetAngleY !== undefined) {
+          angleX = p.lerp(angleX, targetAngleX, 0.1);
+          angleY = p.lerp(angleY, targetAngleY, 0.1);
+        }
         p.push();
-        p.rotateY(angleY);
         p.rotateX(angleX);
+        p.rotateY(angleY);
         p.translate(0, ((maxY + minY) * unit) / 2, 0);
         p.noStroke();
         p.fill(255, 215, 0);
         drawObjects(previewObjects);
         p.pop();
-
-        angleY = p.map(p.mouseX, 0, p.width, 0, p.TWO_PI);
-        angleX = p.map(p.mouseY, 0, p.height, 0, p.TWO_PI);
       };
     };
 
@@ -157,6 +170,7 @@ export default function Preview({ canvasSize, previewObjects, streamObjects }) {
           p.pointLight(255, 255, 255, 0, -200, 300);
 
           p.push();
+          p.rotateY(p.frameCount / 80);
           p.translate(0, ((maxY + minY) * unit) / 2, 0);
           p.noStroke();
           drawObjects(streamObjects);
