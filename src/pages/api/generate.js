@@ -70,8 +70,9 @@ export default async function (req, res) {
     );
     res.writeHead(200, {
       Connection: "keep-alive",
-      "Cache-Control": "no-cache",
+      "Cache-Control": "no-cache, no-transform",
       "Content-Type": "text/event-stream",
+      "X-Accel-Buffering": "no",
     });
     let fullResults = "";
     // Process streaming chatGPT response.
