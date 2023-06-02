@@ -148,7 +148,7 @@ export default function Dashboard({ canvasSize }) {
           lamp, grasp this magic link below and spread your masterpiece far and
           wide!
         </div>
-        <CopyForm defaultText={shareLink} />
+        <CopyForm defaultText={shareLink} onCopy={() => setShareLink(null)} />
       </Modal>
     </div>
   );

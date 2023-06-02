@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { MdContentCopy } from "react-icons/md";
 import Button from "@/components/shared/Button";
 
-function CopyForm({ defaultText }) {
+function CopyForm({ defaultText, onCopy }) {
   const [text, setText] = useState("");
 
   useEffect(() => {
@@ -18,6 +18,9 @@ function CopyForm({ defaultText }) {
       try {
         await navigator.clipboard.writeText(text);
         alert("Copied to clipboard!");
+        if (onCopy) {
+          onCopy();
+        }
         return;
       } catch (err) {
         console.error("Failed to copy with navigator.clipboard", err);
@@ -29,6 +32,9 @@ function CopyForm({ defaultText }) {
     try {
       document.execCommand("copy");
       alert("Copied to clipboard");
+      if (onCopy) {
+        onCopy();
+      }
     } catch (err) {
       alert("Failed to copy text");
     }
