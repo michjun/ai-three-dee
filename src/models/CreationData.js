@@ -1,3 +1,4 @@
+import { creationContentToJson } from "@/utils/json";
 export default class CreationData {
   constructor(
     title = null,
@@ -16,9 +17,7 @@ export default class CreationData {
   }
 
   contentToJson() {
-    return this.content
-      ?.replace(/(\w+)\s*:/g, '"$1":')
-      ?.replace(/},\s*]/g, "}]");
+    return creationContentToJson(this.content);
   }
 
   validate() {

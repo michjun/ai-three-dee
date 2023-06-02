@@ -1,28 +1,38 @@
 import { connectToDb } from "@/lib/mongoose";
 import ChatThread from "@/db/ChatThread";
-import { getOpenai } from "@/lib/openai";
+import { getOpenAI } from "@/lib/openai";
 import { maxRefineCount } from "@/lib/constants";
 import Creation from "@/db/Creation";
 import { getEmbedding, cosineSimilarity } from "@/utils/embedding";
 
 const systemPrompt = `
 Given the following list of shapes, return an array that resembles the target object:
-Cube, Ball, Cylinder, Cone, Triangle Pyramid, Square Pyramid, Donut
+Cube, Ball, Cylinder, Cone, Square Pyramid, Donut
 
 Initial direction of shapes without rotation:
 - Cylinder is standing up
-- Cone, Triangle Pyramid, and Square Pyramid are upside down
+- Cone and Square Pyramid has the tip pointing down
 
 Return the result using the format below:
 [{name: "Ring", shape: "Donut", position: {x: 0, y: 0, z: 0}, rotation: {x: 0, y: 0, z: 0}, scale: {x: 1, y: 1, z: 1}}]
 
-Rotation are specified in radians
+Rotation are specified in radians, use pure numbers without arithmetic operations.
 Use the exact shape names given
 If prompt is unrelated to the object, return "Unrelated"
 `;
 
-function generatePrompt(model) {
-  return `Object: ${model}.`;
+async function generatePrompt(model) {
+  const examples = await getRelevantExamples(model);
+  const messages = [{ role: "system", content: systemPrompt }].concat(
+    examples
+      .map(({ example }) => [
+        { role: "user", content: `Object: ${example.title}` },
+        { role: "assistant", content: example.content },
+      ])
+      .flat()
+  );
+  messages.push({ role: "user", content: `Object: ${model}` });
+  return { messages, examples };
 }
 
 async function getRelevantExamples(creationDescription) {
@@ -40,56 +50,83 @@ async function getRelevantExamples(creationDescription) {
 }
 
 export default async function (req, res) {
-  const creationDescription = req.body.creationDescription || "";
-  if (creationDescription.trim().length === 0) {
-    res.status(400).json({
-      error: {
-        message: "Please enter a model description.",
-      },
-    });
-    return;
-  }
-
-  const examples = await getRelevantExamples(creationDescription);
-
-  const messages = [{ role: "system", content: systemPrompt }].concat(
-    examples
-      .map(({ example }) => [
-        { role: "user", content: generatePrompt(example.title) },
-        { role: "assistant", content: example.content },
-      ])
-      .flat()
-  );
-  console.log(messages);
-  messages.push({ role: "user", content: generatePrompt(creationDescription) });
-
   try {
-    const { openai } = getOpenai();
-    const completion = await openai.createChatCompletion({
-      model: "gpt-4",
-      messages: messages,
+    const creationDescription = decodeURIComponent(req.query.model || "");
+    if (creationDescription.trim().length === 0) {
+      throw new Error("Invalid input");
+    }
+
+    const { messages, examples } = await generatePrompt(creationDescription);
+    console.log(messages);
+
+    const { openAI } = getOpenAI();
+    const { data } = await openAI.createChatCompletion(
+      {
+        model: "gpt-4",
+        messages: messages,
+        stream: true,
+      },
+      { responseType: "stream" }
+    );
+    res.writeHead(200, {
+      Connection: "keep-alive",
+      "Cache-Control": "no-cache",
+      "Content-Type": "text/event-stream",
     });
-    console.log(completion.data);
-    const result = completion.data.choices[0].message;
-    messages.push(result);
-    await connectToDb();
-    const thread = await ChatThread.create({
-      title: creationDescription,
-      messages: messages,
-      exampleCount: examples.length,
-      refineCount: 0,
+    let fullResults = "";
+    // Process streaming chatGPT response.
+    data.on("data", async (text) => {
+      try {
+        const lines = text
+          .toString()
+          .split("\n")
+          .filter((line) => line.trim() !== "");
+        for (const line of lines) {
+          const message = line.replace(/^data: /, "");
+          if (message === "[DONE]") {
+            // End of openAI completion, store results in DB
+            messages.push({ role: "assistant", content: fullResults });
+            await connectToDb();
+            const thread = await ChatThread.create({
+              title: creationDescription,
+              messages: messages,
+              exampleCount: examples.length,
+              refineCount: 0,
+            });
+            const endingData = {
+              threadId: thread._id,
+              refineCount: maxRefineCount - thread.refineCount,
+            };
+            res.write(`data: [DONE]\n\n`);
+            res.write(`data: ${JSON.stringify(endingData)}\n\n`);
+            res.end();
+            return;
+          }
+          const { choices } = JSON.parse(message);
+          const newTokens = choices[0].delta.content;
+          if (newTokens) {
+            fullResults += newTokens;
+            res.write(`data: ${newTokens}\n\n`);
+          }
+          if (fullResults === "Unrelated") {
+            throw new Error("Unrelated");
+          }
+        }
+      } catch (error) {
+        console.error(`Error with stream response: ${error.message}`);
+        res.write(`data: [ERROR]\n\n`);
+        res.end();
+      }
     });
-    res.status(200).json({
-      result: result,
-      threadId: thread._id,
-      refinesLeft: maxRefineCount - thread.refineCount,
+
+    data.on("error", (error) => {
+      console.error(`Stream Error: ${error.message}`);
+      res.write(`data: [ERROR]\n\n`);
+      res.end();
     });
   } catch (error) {
-    console.error(`Error with OpenAI API request: ${error.message}`);
-    res.status(500).json({
-      error: {
-        message: "An error occurred during your request.",
-      },
-    });
+    console.error(`Error with Generate Endpoint: ${error.message}`);
+    res.write(`data: [ERROR]\n\n`);
+    res.end();
   }
 }

@@ -7,11 +7,12 @@ import { availableActions } from "@/components/ActionBar";
 import ActionBar from "@/components/ActionBar";
 import HeaderLogo from "@/components/HeaderLogo";
 import { MdContentCopy } from "react-icons/md";
-import { IconContext } from "react-icons";
+import { isJsonString, creationContentToJson } from "@/utils/json";
 
 export default function AdvancedDashboard() {
   const [creation, setCreation] = useState(new CreationData());
   const [preview, setPreview] = useState([]);
+  const [stream, setStream] = useState();
   const [contentSaved, setContentSaved] = useState(true);
   const [refreshPreview, setRefreshPreview] = useState(false);
   const [refreshCreations, setRefreshCreations] = useState(true);
@@ -76,36 +77,6 @@ export default function AdvancedDashboard() {
     }
   }
 
-  function creationListItem(item) {
-    return (
-      <li
-        key={item.id}
-        className={`text-white cursor-pointer border-b border-neutral-300 ${
-          item.id === creation.id ? selectedStyle : ""
-        }`}
-      >
-        <a
-          className="block w-full p-2.5 flex justify-between items-center"
-          onClick={(e) => setCreationAndRefreshView(item)}
-        >
-          <div className={item.example ? "text-yellow-300" : ""}>
-            {item.title}
-          </div>
-          <div
-            className="text-white w-4 pr-1"
-            onClick={async (e) => {
-              e.stopPropagation();
-              await navigator.clipboard.writeText(item.id);
-              alert("ID copied to clipboard!");
-            }}
-          >
-            <MdContentCopy />
-          </div>
-        </a>
-      </li>
-    );
-  }
-
   function showPreview() {
     try {
       const jsonString = creation.contentToJson();
@@ -143,6 +114,15 @@ export default function AdvancedDashboard() {
     setContentSaved(false);
   }
 
+  function updateStream(stream) {
+    const jsonStream = creationContentToJson(stream + "]");
+    if (isJsonString(jsonStream)) {
+      setStream(JSON.parse(jsonStream));
+    } else if (!stream) {
+      setStream([]);
+    }
+  }
+
   function setCreationAndRefreshView(creation) {
     setCreation(creation);
     setRefreshPreview(true);
@@ -151,6 +131,36 @@ export default function AdvancedDashboard() {
     } else {
       setContentSaved(false);
     }
+  }
+
+  function creationListItem(item) {
+    return (
+      <li
+        key={item.id}
+        className={`text-white cursor-pointer border-b border-neutral-300 ${
+          item.id === creation.id ? selectedStyle : ""
+        }`}
+      >
+        <a
+          className="block w-full p-2.5 flex justify-between items-center"
+          onClick={(e) => setCreationAndRefreshView(item)}
+        >
+          <div className={item.example ? "text-yellow-300" : ""}>
+            {item.title}
+          </div>
+          <div
+            className="text-white w-4 pr-1"
+            onClick={async (e) => {
+              e.stopPropagation();
+              await navigator.clipboard.writeText(item.id);
+              alert("ID copied to clipboard!");
+            }}
+          >
+            <MdContentCopy />
+          </div>
+        </a>
+      </li>
+    );
   }
 
   return (
@@ -173,6 +183,7 @@ export default function AdvancedDashboard() {
             prompt={creation.title}
             hasUnsavedChanges={!contentSaved}
             onPromptChange={onPromptChange}
+            updateStream={updateStream}
             onCreationChange={setCreationAndRefreshView}
             className="bg-gradient-to-r from-sky-800 to-indigo-800"
           />
@@ -196,7 +207,11 @@ export default function AdvancedDashboard() {
         </div>
       </div>
       <div className="absolute inset-y-0 right-0 w-1/2 bg-black">
-        <Preview canvasSize={canvasSize} previewObjects={preview} />
+        <Preview
+          canvasSize={canvasSize}
+          previewObjects={preview}
+          streamObjects={stream}
+        />
       </div>
     </div>
   );

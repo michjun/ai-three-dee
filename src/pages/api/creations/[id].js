@@ -25,7 +25,7 @@ export default async function (req, res) {
         },
       });
     } catch (error) {
-      console.log(error);
+      console.error(error);
       res.status(500).json({
         success: false,
         error: "Error fetching creations from MongoDB",

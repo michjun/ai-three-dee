@@ -1,4 +1,4 @@
-import { getOpenai } from "@/lib/openai";
+import { getOpenAI } from "@/lib/openai";
 
 function dotProduct(v1, v2) {
   let product = 0;
@@ -21,8 +21,8 @@ export function cosineSimilarity(v1, v2) {
 }
 
 export async function getEmbedding(content) {
-  const { openai } = getOpenai();
-  const response = await openai.createEmbedding({
+  const { openAI } = getOpenAI();
+  const response = await openAI.createEmbedding({
     model: "text-embedding-ada-002",
     input: content,
   });

@@ -1,6 +1,6 @@
 import { connectToDb } from "@/lib/mongoose";
 import ChatThread from "@/db/ChatThread";
-import { getOpenai } from "@/lib/openai";
+import { getOpenAI } from "@/lib/openai";
 import { maxRefineCount } from "@/lib/constants";
 
 export default async function (req, res) {
@@ -37,8 +37,8 @@ export default async function (req, res) {
     content,
   }));
   try {
-    const { openai } = getOpenai();
-    const completion = await openai.createChatCompletion({
+    const { openAI } = getOpenAI();
+    const completion = await openAI.createChatCompletion({
       model: "gpt-4",
       messages: messages,
     });

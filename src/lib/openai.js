@@ -1,13 +1,13 @@
 import { Configuration, OpenAIApi } from "openai";
 
-let configuration, openai;
+let configuration, openAI;
 
-export function getOpenai() {
-  if (!configuration || !openai) {
+export function getOpenAI() {
+  if (!configuration || !openAI) {
     configuration = new Configuration({
       apiKey: process.env.OPENAI_API_KEY,
     });
-    openai = new OpenAIApi(configuration);
+    openAI = new OpenAIApi(configuration);
   }
-  return { configuration, openai };
+  return { configuration, openAI };
 }

@@ -9,12 +9,47 @@ export default function PromptBar({
   onPromptChange,
   hasUnsavedChanges,
   onCreationChange,
+  updateStream,
   className,
 }) {
   const [showWaitMessage, setShowWaitMessage] = useState(false);
 
+  function connectAIStream() {
+    return new Promise((resolve, reject) => {
+      const eventSource = new EventSource(
+        `${
+          process.env.NEXT_PUBLIC_HOST_URL
+        }/api/generate?model=${encodeURIComponent(prompt)}`
+      );
+      let done = false;
+      let result = "";
+      eventSource.onmessage = (event) => {
+        const data = event.data;
+        if (done) {
+          const { threadId, refineCount } = JSON.parse(data);
+          eventSource.close();
+          resolve({ result, threadId, refineCount });
+        }
+        if (data === "[DONE]") {
+          done = true;
+        } else if (data === "[ERROR]") {
+          eventSource.close();
+          reject();
+        } else {
+          result += data;
+          updateStream(result);
+        }
+      };
+      eventSource.onerror = (event) => {
+        console.error(`Event Source Error: ${event}`);
+        eventSource.close();
+        reject();
+      };
+    });
+  }
+
   async function onSubmit(event) {
-    if (!prompt) {
+    if (!prompt || prompt.trim().length === 0) {
       alert("Please enter your wish to the 3DGenie.");
       return;
     }
@@ -23,51 +58,25 @@ export default function PromptBar({
         return;
       }
     }
-    onCreationChange(new CreationData(prompt));
+    updateStream("");
 
     const waitMsgTimeout = setTimeout(() => {
       setShowWaitMessage(true);
-    }, 8000);
+    }, 60000);
+
     try {
-      const response = await fetch("/api/generate", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ creationDescription: prompt }),
-      });
-      const data = await response.json();
+      updateStream("");
+      const { result, threadId, refineCount } = await connectAIStream();
       setShowWaitMessage(false);
       clearTimeout(waitMsgTimeout);
-
-      if (response.status !== 200) {
-        throw (
-          data.error ||
-          new Error(`Request failed with status ${response.status}`)
-        );
-      }
-      // Sometimes ChatGPT returns extra text before the actual result,
-      // so trim everything before the first "[" character
-      const content = data.result.content;
-      if (content === "Unrelated") {
-        alert(
-          "Ah, a twist in the cosmic tale! Your wish, dear friend, is beyond my mystical reach. Please, bestow upon me another request!"
-        );
-      } else {
-        onCreationChange(
-          new CreationData(
-            prompt,
-            content.slice(content.indexOf("[")),
-            data.threadId,
-            data.refinesLeft
-          )
-        );
-      }
+      onCreationChange(new CreationData(prompt, result, threadId, refineCount));
     } catch (error) {
       setShowWaitMessage(false);
       clearTimeout(waitMsgTimeout);
       console.error(error);
-      alert(error.message);
+      alert(
+        "Ah, a twist in the cosmic tale! Your wish, dear friend, is beyond my mystical reach. Please, bestow upon me another request!"
+      );
     }
   }
 

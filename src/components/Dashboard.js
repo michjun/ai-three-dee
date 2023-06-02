@@ -5,10 +5,12 @@ import ActionBar, { availableActions } from "@/components/ActionBar";
 import CreationData from "@/models/CreationData";
 import Modal from "@/components/shared/Modal";
 import HeaderLogo from "@/components/HeaderLogo";
+import { isJsonString, creationContentToJson } from "@/utils/json";
 
 export default function Dashboard({ canvasSize }) {
   const [creation, setCreation] = useState(new CreationData());
   const [preview, setPreview] = useState([]);
+  const [stream, setStream] = useState();
   const [contentSaved, setContentSaved] = useState(true);
   const [refreshPreview, setRefreshPreview] = useState(false);
   const [showWelcomeMsg, setShowWelcomeMsg] = useState(false);
@@ -102,6 +104,14 @@ export default function Dashboard({ canvasSize }) {
       )
     );
   }
+  function updateStream(stream) {
+    const jsonStream = creationContentToJson(stream + "]");
+    if (isJsonString(jsonStream)) {
+      setStream(JSON.parse(jsonStream));
+    } else if (!stream) {
+      setStream([]);
+    }
+  }
 
   function setCreationAndRefreshView(creation) {
     setCreation(creation);
@@ -126,11 +136,16 @@ export default function Dashboard({ canvasSize }) {
             hasUnsavedChanges={!contentSaved}
             onPromptChange={onPromptChange}
             onCreationChange={setCreationAndRefreshView}
+            updateStream={updateStream}
             className="grow border-0 bg-black pt-2"
           />
         </div>
         <div className="h-[calc(100%-8rem)]">
-          <Preview canvasSize={canvasSize} previewObjects={preview} />
+          <Preview
+            canvasSize={canvasSize}
+            previewObjects={preview}
+            streamObjects={stream}
+          />
         </div>
         <ActionBar
           creation={creation}

@@ -8,7 +8,7 @@ export default async function (req, res) {
       const creations = await Creation.find({}).select("-embedding");
       res.status(200).json({ success: true, data: creations });
     } catch (error) {
-      console.log(error);
+      console.error(error);
       res.status(500).json({
         success: false,
         error: "Error fetching creations from MongoDB",
@@ -19,7 +19,7 @@ export default async function (req, res) {
       const creation = await Creation.create(req.body);
       res.status(200).json({ success: true, data: creation });
     } catch (error) {
-      console.log(error);
+      console.error(error);
       res.status(500).json({
         success: false,
         error: "Error creating creation in MongoDB",
