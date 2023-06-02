@@ -66,6 +66,7 @@ export default function Preview({ canvasSize, previewObjects, streamObjects }) {
       let angleY = 0;
       let angleX = 0;
       let targetAngleX, targetAngleY;
+      let prevMouseX, prevMouseY;
 
       const drawObjects = (objects) => {
         for (let obj of objects) {
@@ -77,18 +78,43 @@ export default function Preview({ canvasSize, previewObjects, streamObjects }) {
       };
 
       p.setup = () => {
-        p.createCanvas(canvasSize.width, canvasSize.height, p.WEBGL);
-      };
+        const canvas = p.createCanvas(
+          canvasSize.width,
+          canvasSize.height,
+          p.WEBGL
+        );
+        canvas.touchStarted(() => {
+          prevMouseX = p.mouseX;
+          prevMouseY = p.mouseY;
+        });
 
-      p.mouseMoved = () => {
-        targetAngleY = p.map(p.mouseX, 0, p.width, -p.PI * 1.2, p.PI * 1.2);
-        targetAngleX = p.map(p.mouseY, 0, p.height, p.PI / 4, -p.PI / 4);
-      };
+        canvas.touchMoved(() => {
+          if (prevMouseX !== undefined && prevMouseY !== undefined) {
+            let deltaX = p.mouseX - prevMouseX;
+            let deltaY = p.mouseY - prevMouseY;
 
-      p.touchMoved = () => {
-        targetAngleY = p.map(p.mouseX, 0, p.width, -p.PI * 1.2, p.PI * 1.2);
-        targetAngleX = p.map(p.mouseY, 0, p.height, p.PI / 2, -p.PI / 2);
-        return false;
+            targetAngleY = p.map(
+              deltaX,
+              -p.width / 2,
+              p.width / 2,
+              -p.PI * 1.2,
+              p.PI * 1.2
+            );
+            targetAngleX = p.map(
+              deltaY,
+              -p.height / 2,
+              p.height / 2,
+              p.PI / 2,
+              -p.PI / 2
+            );
+          }
+          return false;
+        });
+
+        canvas.mouseMoved(() => {
+          targetAngleY = p.map(p.mouseX, 0, p.width, -p.PI * 1.2, p.PI * 1.2);
+          targetAngleX = p.map(p.mouseY, 0, p.height, p.PI / 4, -p.PI / 4);
+        });
       };
 
       p.draw = () => {
