@@ -18,7 +18,7 @@ Return the result using the format below:
 
 Rotation are specified in radians, use pure numbers without arithmetic operations.
 Use the exact shape names given
-If prompt is unrelated to the object, return "Unrelated"
+If prompt is not something that is render-able, return "Unrelated"
 `;
 
 async function generatePrompt(model) {

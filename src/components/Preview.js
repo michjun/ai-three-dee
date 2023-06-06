@@ -56,6 +56,7 @@ export default function Preview({ canvasSize, previewObjects, streamObjects }) {
     }
   }
 
+  // Completed model render mode
   useEffect(() => {
     if (!previewObjects || !canvasSize) return;
 
@@ -142,14 +143,16 @@ export default function Preview({ canvasSize, previewObjects, streamObjects }) {
     setIndex(index + 1);
   }, [previewObjects, canvasSize]);
 
+  // Partial object stream render mode
   useEffect(() => {
     if (!streamObjects) return;
 
-    const { maxY, minY, unit } = defineScale(streamObjects);
-    let scaleMultiplier = 0.2;
-
     // Create a new p5.js sketch function using the provided code
     const sketch = (p) => {
+      const { maxY, minY, unit } = defineScale(streamObjects);
+      let scaleMultiplier = 0.2;
+      let font;
+
       const drawObjects = (objects) => {
         objects.forEach(function (obj, i) {
           // The scale up animation is only applied to the last object
@@ -159,6 +162,12 @@ export default function Preview({ canvasSize, previewObjects, streamObjects }) {
           renderShape(obj, p, unit);
           p.pop();
         });
+      };
+
+      p.preload = () => {
+        font = p.loadFont(
+          "https://cdnjs.cloudflare.com/ajax/libs/topcoat/0.8.0/font/SourceCodePro-Bold.otf"
+        );
       };
 
       p.setup = () => {
@@ -202,8 +211,24 @@ export default function Preview({ canvasSize, previewObjects, streamObjects }) {
           p.noStroke();
           drawObjects(streamObjects);
           p.pop();
-          if (scaleMultiplier < 1) {
-            scaleMultiplier += 0.005;
+
+          // Add a text label to the last object so that people
+          // can see what we are currently rendering
+          if (streamObjects.length > 0) {
+            const lastObjectName = streamObjects[streamObjects.length - 1].name;
+            p.push();
+            p.textFont(font);
+            p.textAlign(p.CENTER, p.CENTER);
+            p.textSize(24);
+            p.text(
+              lastObjectName.replace(/_/g, " "),
+              0,
+              -(canvasSize.height / 2 - 100)
+            );
+            p.pop();
+            if (scaleMultiplier < 1) {
+              scaleMultiplier += 0.005;
+            }
           }
         }
       };
