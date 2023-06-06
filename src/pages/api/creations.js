@@ -5,7 +5,7 @@ export default async function (req, res) {
   await connectToDb();
   if (req.method === "GET") {
     try {
-      const creations = await Creation.find({}).select("-embedding");
+      const creations = await Creation.find(req.query).select("-embedding");
       res.status(200).json({ success: true, data: creations });
     } catch (error) {
       console.error(error);
