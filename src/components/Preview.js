@@ -23,7 +23,7 @@ export default function Preview({
       minY = Math.min(minY, py);
     });
     const unit =
-      maxScale > 5 ? (0.4 * canvasSize.width) / maxScale : canvasSize.width / 8;
+      maxScale > 4 ? (0.4 * canvasSize.width) / maxScale : canvasSize.width / 8;
     return { maxY, minY, unit };
   }
 

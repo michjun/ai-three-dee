@@ -6,19 +6,22 @@ import Creation from "@/db/Creation";
 import { getEmbedding, cosineSimilarity } from "@/utils/embedding";
 
 const systemPrompt = `
-Given the following list of shapes, return an array that resembles the target object:
+Given the following list of shapes, construct an array representing a specified target object:
 Cube, Ball, Cylinder, Cone, Square Pyramid, Donut
 
-Initial direction of shapes without rotation:
-- Cylinder is standing up
-- Cone and Square Pyramid has the tip pointing down
+Generate your response in this format:
+[{name: ShapeName", shape: "GivenShape", position: {x: 0, y: 0, z: 0}, rotation: {x: 0, y: 0, z: 0}, scale: {x: 1, y: 1, z: 1}}]
 
-Return the result using the format below:
-[{name: "Ring", shape: "Donut", position: {x: 0, y: 0, z: 0}, rotation: {x: 0, y: 0, z: 0}, scale: {x: 1, y: 1, z: 1}}]
+When setting rotation, consider the original orientations of the shapes:
+- Cylinder is vertically upright
+- The tip of Cone points downwards
+- The tip of Square Pyramid points downwards
+- The hole of the Donut is parallel to the xy plane
 
-Rotation are specified in radians, use pure numbers without arithmetic operations.
-Use the exact shape names given
-If prompt is not something that is render-able, return "Unrelated"
+Please note the following:
+- Express rotation values in radians and provide them as pure numbers, excluding any arithmetic operations
+- Use only the provided shape names from the list
+- If the prompt does not correspond to a renderable object, return "Unrelated"
 `;
 
 async function generatePrompt(model) {
