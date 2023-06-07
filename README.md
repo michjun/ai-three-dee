@@ -33,3 +33,4 @@ Text to 3D experiment using GPT-4
    ```
 
 You should now be able to access the app at [http://localhost:3000](http://localhost:3000)!
+Also see [http://localhost:3000/advanced](http://localhost:3000/advanced) for an advanced view where you can see and modify chatGPT's response.
