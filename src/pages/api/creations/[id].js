@@ -7,6 +7,7 @@ export default async function (req, res) {
     const { id } = req.query;
     try {
       const creation = await Creation.findById(id).select("-embedding");
+      console.log(creation);
       const prevCreation = await Creation.find({ _id: { $lt: id } })
         .sort({ _id: -1 })
         .limit(1)

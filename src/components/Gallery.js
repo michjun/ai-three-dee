@@ -39,6 +39,7 @@ export default function Gallery({ canvasSize }) {
       try {
         const response = await fetch(`/api/creations/${creationId}`);
         const data = (await response.json()).data;
+        console.log(data);
         setCreation(new CreationData(data.creation));
         setPrevious(data.prevId);
         setNext(data.nextId);

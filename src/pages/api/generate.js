@@ -4,13 +4,14 @@ import { getOpenAI } from "@/lib/openai";
 import { maxRefineCount } from "@/lib/constants";
 import Creation from "@/db/Creation";
 import { getEmbedding, cosineSimilarity } from "@/utils/embedding";
+import { fewShotModes, staticFewShotModeNames } from "@/lib/constants";
 
 const systemPrompt = `
-Given the following list of shapes, construct an array representing a specified target object:
-Cube, Ball, Cylinder, Cone, Square Pyramid, Donut
+Construct an array representing a target object using the following list of shapes:
+[Cube, Ball, Cylinder, Cone, Square Pyramid, Donut]
 
-Generate your response in this format:
-[{name: ShapeName", shape: "GivenShape", position: {x: 0, y: 0, z: 0}, rotation: {x: 0, y: 0, z: 0}, scale: {x: 1, y: 1, z: 1}}]
+Breakdown the object into parts, and identify the best shape for each part.
+Define the position, rotation, and scale of each part, relative to the other parts.
 
 When setting rotation, consider the original orientations of the shapes:
 - Cylinder is vertically upright
@@ -18,17 +19,20 @@ When setting rotation, consider the original orientations of the shapes:
 - The tip of Square Pyramid points downwards
 - The hole of the Donut is parallel to the xy plane
 
+Generate your response in this format:
+[{name: ShapeName", shape: "GivenShape", position: {x: 0, y: 0, z: 0}, rotation: {x: 0, y: 0, z: 0}, scale: {x: 1, y: 1, z: 1}}]
+
 Please note the following:
 - Express rotation values in radians and provide them as pure numbers, excluding any arithmetic operations
 - Use only the provided shape names from the list
-- If the prompt does not correspond to a renderable object, return "Unrelated"
+- If the prompt object does not have a physical shape, return "Unrelated"
 `;
 
 async function generatePrompt(model) {
-  const examples = await getRelevantExamples(model);
+  const examples = await getExamples(model);
   const messages = [{ role: "system", content: systemPrompt }].concat(
     examples
-      .map(({ example }) => [
+      .map((example) => [
         { role: "user", content: `Object: ${example.title}` },
         { role: "assistant", content: example.content },
       ])
@@ -47,9 +51,32 @@ async function getRelevantExamples(creationDescription) {
       similarity: cosineSimilarity(example.embedding, creationEmbedding),
       example: example,
     }))
-    .sort((a, b) => b.similarity - a.similarity)
-    .slice(0, 3); // Hardcoded to 3 examples for now, todo: make this dynamic based on token count
-  return relevantExamples;
+    .sort((a, b) => a.similarity - b.similarity)
+    .slice(-2); // Hardcoded to 2 examples for now, todo: make this dynamic based on token count
+  return relevantExamples.map(({ example }) => example);
+}
+
+async function getStaticExamples() {
+  await connectToDb();
+  const examples = await Creation.find({
+    useAsExample: true,
+    title: { $in: staticFewShotModeNames },
+  });
+  return examples;
+}
+
+async function getExamples(creationDescription) {
+  const modeKeys = Object.keys(fewShotModes);
+  const fewShotMode =
+    process.env.FEW_SHOT_MODE ||
+    fewShotModes[modeKeys[(modeKeys.length * Math.random()) << 0]];
+  if (fewShotMode === fewShotModes.noShotMode) {
+    return [];
+  } else if (fewShotMode === fewShotModes.staticMode) {
+    return await getStaticExamples();
+  } else {
+    return await getRelevantExamples(creationDescription);
+  }
 }
 
 export default async function (req, res) {
