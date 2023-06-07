@@ -170,6 +170,7 @@ export default function AdvancedDashboard() {
           canvasSize={canvasSize}
           previewObjects={preview}
           streamObjects={stream}
+          modelName={creation.title}
         />
       </div>
     </div>

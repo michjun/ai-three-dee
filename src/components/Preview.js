@@ -1,7 +1,12 @@
 import { useEffect, useRef, useState } from "react";
 import { NextReactP5Wrapper } from "@p5-wrapper/next";
 
-export default function Preview({ canvasSize, previewObjects, streamObjects }) {
+export default function Preview({
+  canvasSize,
+  modelName,
+  previewObjects,
+  streamObjects,
+}) {
   const sketchRef = useRef("");
   // Hacky way to trigger rerender
   const [index, setIndex] = useState(0);
@@ -60,14 +65,13 @@ export default function Preview({ canvasSize, previewObjects, streamObjects }) {
   useEffect(() => {
     if (!previewObjects || !canvasSize) return;
 
-    const { maxY, minY, unit } = defineScale(previewObjects);
-
     // Create a new p5.js sketch function using the provided code
     const sketch = (p) => {
+      const { maxY, minY, unit } = defineScale(previewObjects);
       let angleY = 0;
       let angleX = 0;
-      let targetAngleX, targetAngleY;
-      let prevMouseX, prevMouseY;
+      let targetAngleX, targetAngleY, prevMouseX, prevMouseY;
+      let font;
 
       const drawObjects = (objects) => {
         for (let obj of objects) {
@@ -76,6 +80,12 @@ export default function Preview({ canvasSize, previewObjects, streamObjects }) {
           renderShape(obj, p, unit);
           p.pop();
         }
+      };
+
+      p.preload = () => {
+        font = p.loadFont(
+          "https://cdnjs.cloudflare.com/ajax/libs/topcoat/0.8.0/font/SourceCodePro-Bold.otf"
+        );
       };
 
       p.setup = () => {
@@ -136,6 +146,27 @@ export default function Preview({ canvasSize, previewObjects, streamObjects }) {
         p.fill(255, 215, 0);
         drawObjects(previewObjects);
         p.pop();
+
+        if (previewObjects.length > 1) {
+          // Render text label to show all the components
+          const modelDescription =
+            previewObjects
+              .map((obj) => obj.name.replace(/_/g, " "))
+              .join(" + ") + ` = \n\n${modelName.toUpperCase()}`;
+          p.push();
+          p.textFont(font);
+          p.textLeading(30);
+          p.textAlign(p.CENTER, p.TOP);
+          p.textSize(18);
+          p.text(
+            modelDescription,
+            -(canvasSize.width / 2 - 50),
+            -(canvasSize.height / 2 - 40),
+            canvasSize.width - 100,
+            200
+          );
+          p.pop();
+        }
       };
     };
 

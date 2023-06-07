@@ -103,6 +103,7 @@ export default function Dashboard({ canvasSize }) {
             canvasSize={canvasSize}
             previewObjects={preview}
             streamObjects={stream}
+            modelName={creation.title}
           />
         </div>
         <ActionBar
