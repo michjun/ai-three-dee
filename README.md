@@ -16,9 +16,9 @@ Text to 3D experiment using GPT-4
 
 4. [Optional] set FEW_SHOT_MODE in your .env file.
 
-   FEW_SHOT_MODE=0 will generate results using no example input.
-   FEW_SHOT_MODE=1 will generate results using a hardcoded set of example input.
-   FEW_SHOT_MODE=2 will generate results using example inputs that is the most relevant to the object.
+   `FEW_SHOT_MODE=0` will generate results using no example input.
+   `FEW_SHOT_MODE=1` will generate results using a hardcoded set of example input.
+   `FEW_SHOT_MODE=2` will generate results using example inputs that is the most relevant to the object.
    
    If this value is not set, with each request it will randomly pick a mode so that users can get a variety of results.
 
