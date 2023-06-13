@@ -70,6 +70,8 @@ export default function PromptBar({
     }, 60000);
 
     const title = prompt;
+    onCreationChange(new CreationData({ title }));
+
     try {
       const { content, threadId, refinesLeft } = await connectAIStream();
       setShowWaitMessage(false);

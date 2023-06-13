@@ -44,6 +44,11 @@ export default function Preview({
   }
 
   function renderShape(obj, p, unit) {
+    if (obj.color) {
+      p.fill(obj.color.r, obj.color.g, obj.color.b);
+    } else {
+      p.fill(255, 215, 0);
+    }
     if (obj.shape === "Cube" || obj.shape === "Box") {
       p.box(unit);
     } else if (obj.shape === "Ball" || obj.shape === "Sphere") {
@@ -143,7 +148,6 @@ export default function Preview({
         p.rotateY(angleY);
         p.translate(0, ((maxY + minY) * unit) / 2, 0);
         p.noStroke();
-        p.fill(255, 215, 0);
         drawObjects(previewObjects);
         p.pop();
 

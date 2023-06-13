@@ -11,7 +11,7 @@ Construct an array representing an object using the list of shapes:
 [Cube, Ball, Cylinder, Cone, Square Pyramid, Donut]
 
 Breakdown the object into parts, and identify the best shape for each part.
-Define the position, rotation, and scale of each part, relative to the other parts.
+Define the position, rotation, scale, and color of each part, relative to the other parts.
 
 When setting rotation, consider the original directions of the shapes:
 - Cylinder is standing upright
@@ -20,7 +20,7 @@ When setting rotation, consider the original directions of the shapes:
 - The hole of the Donut is parallel to the xy plane
 
 Generate your response in this format:
-[{name: ShapeName", shape: "GivenShape", position: {x: 0, y: 0, z: 0}, rotation: {x: 0, y: 0, z: 0}, scale: {x: 1, y: 1, z: 1}}]
+[{name: ShapeName", shape: "GivenShape", position: {x: 0, y: 0, z: 0}, rotation: {x: 0, y: 0, z: 0}, scale: {x: 1, y: 1, z: 1}, color: {r: 100, g: 100, b: 255}}]
 
 Please note the following:
 - Express rotation values in radians and provide them as pure numbers, excluding any arithmetic operations
