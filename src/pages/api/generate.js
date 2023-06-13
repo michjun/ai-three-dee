@@ -7,14 +7,14 @@ import { getEmbedding, cosineSimilarity } from "@/utils/embedding";
 import { fewShotModes, staticFewShotModeNames } from "@/lib/constants";
 
 const systemPrompt = `
-Construct an array representing a target object using the following list of shapes:
+Construct an array representing an object using the list of shapes:
 [Cube, Ball, Cylinder, Cone, Square Pyramid, Donut]
 
 Breakdown the object into parts, and identify the best shape for each part.
 Define the position, rotation, and scale of each part, relative to the other parts.
 
-When setting rotation, consider the original orientations of the shapes:
-- Cylinder is vertically upright
+When setting rotation, consider the original directions of the shapes:
+- Cylinder is standing upright
 - The tip of Cone points downwards
 - The tip of Square Pyramid points downwards
 - The hole of the Donut is parallel to the xy plane
@@ -26,10 +26,31 @@ Please note the following:
 - Express rotation values in radians and provide them as pure numbers, excluding any arithmetic operations
 - Use only the provided shape names from the list
 - If the prompt object does not have a physical shape, return "Unrelated"
+- Try to be a little creative, but don't worry too much about it
+`;
+
+const chainOfThoughtPrompt = `
+A house consists of a base, roof, and chimney. 
+Base (Cube) requires no rotation / translation {x: 0, y: 0, z: 0}, scale to a rectangular form {x: 2, y: 1, z: 1.5}.
+Roof (Square Pyramid) is positioned on top of the base at {x: 0, y: 1, z: 0}, rotate on x axis to point the pyramid's tip upwards and on y axis to align the roof with the base {x: 3.14, y: 0.785, z: 0}, scale for sufficient width and modest height {x: 1.6, y: 1.2, z: 1.6}.
+Chimney (Cylinder) is positioned atop the roof at {x: 0.7, y: 1.2, z: 0}, for upright cylinder keep rotation as {x: 0, y: 0, z: 0}, scale to long and skinny {x: 0.2, y: 0.8, z: 0.2}.
+
+Final Result:
+[
+{name: "Base", shape: "Cube", position: {x: 0, y: 0, z: 0}, rotation: {x: 0, y: 0, z: 0}, scale: {x: 2, y: 1, z: 1.5}},
+{name: "Roof", shape: "Square Pyramid", position: {x: 0, y: 1, z: 0}, rotation: {x: 3.14, y: 0.785, z: 0}, scale: {x: 1.6, y: 1.2, z: 1.6}},
+{name: "Chimney", shape: "Cylinder", position: {x: 0.7, y: 1.2, z: 0}, rotation: {x: 0, y: 0, z: 0}, scale: {x: 0.2, y: 0.8, z: 0.2}}
+]
 `;
 
 async function generatePrompt(model) {
-  const examples = await getExamples(model);
+  const modeKeys = Object.keys(fewShotModes);
+  const fewShotMode =
+    process.env.FEW_SHOT_MODE ||
+    // If a mode is not set, use a random mode except for chainOfThoughtMode
+    // since right now chainOfThoughtMode is producing crap
+    fewShotModes[modeKeys[((modeKeys.length - 1) * Math.random()) << 0]];
+  const examples = await getExamples(model, fewShotMode);
   const messages = [{ role: "system", content: systemPrompt }].concat(
     examples
       .map((example) => [
@@ -38,6 +59,10 @@ async function generatePrompt(model) {
       ])
       .flat()
   );
+  if (fewShotMode === fewShotModes.chainOfThoughtMode) {
+    messages.push({ role: "user", content: `Object: House` });
+    messages.push({ role: "assistant", content: chainOfThoughtPrompt });
+  }
   messages.push({ role: "user", content: `Object: ${model}` });
   return { messages, examples };
 }
@@ -65,17 +90,13 @@ async function getStaticExamples() {
   return examples;
 }
 
-async function getExamples(creationDescription) {
-  const modeKeys = Object.keys(fewShotModes);
-  const fewShotMode =
-    process.env.FEW_SHOT_MODE ||
-    fewShotModes[modeKeys[(modeKeys.length * Math.random()) << 0]];
-  if (fewShotMode === fewShotModes.noShotMode) {
-    return [];
-  } else if (fewShotMode === fewShotModes.staticMode) {
+async function getExamples(creationDescription, fewShotMode) {
+  if (fewShotMode === fewShotModes.staticMode) {
     return await getStaticExamples();
-  } else {
+  } else if (fewShotMode === fewShotModes.dynamicMode) {
     return await getRelevantExamples(creationDescription);
+  } else {
+    return [];
   }
 }
 
@@ -116,6 +137,7 @@ export default async function (req, res) {
           const message = line.replace(/^data: /, "");
           if (message === "[DONE]") {
             // End of openAI completion, store results in DB
+            console.log(fullResults);
             messages.push({ role: "assistant", content: fullResults });
             await connectToDb();
             const thread = await ChatThread.create({

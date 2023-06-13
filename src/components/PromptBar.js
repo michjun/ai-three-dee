@@ -28,6 +28,10 @@ export default function PromptBar({
         if (done) {
           const { threadId, refinesLeft } = JSON.parse(data);
           eventSource.close();
+          // Handle chain of thoughts results
+          if (content.includes("Final Result:\n")) {
+            content = content.split("Final Result:\n")[1];
+          }
           resolve({ content, threadId, refinesLeft });
         }
         if (data === "[DONE]") {

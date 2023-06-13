@@ -67,6 +67,9 @@ export default function Dashboard({ canvasSize }) {
   }
 
   function updateStream(stream) {
+    if (stream && stream.includes("Final Result:\n")) {
+      stream = stream.split("Final Result:\n")[1];
+    }
     const jsonStream = creationContentToJson(stream + "]");
     if (isJsonString(jsonStream)) {
       setStream(JSON.parse(jsonStream));
