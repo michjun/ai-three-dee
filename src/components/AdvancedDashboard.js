@@ -41,6 +41,7 @@ export default function AdvancedDashboard() {
 
   async function saveCreation() {
     try {
+      //const { data, errors } = await creation.saveContent();
       const { data, errors } = await creation.save();
       if (errors) {
         return alert(errors.join("\n"));

@@ -51,4 +51,23 @@ export default class CreationData {
     const data = (await response.json()).data;
     return { data };
   }
+
+  async saveContent() {
+    const { errors } = this.validate();
+    if (errors.length > 0) {
+      return { errors };
+    }
+
+    const response = await fetch(`/api/creations/${this._id}`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        content: this.content,
+      }),
+    });
+    const data = (await response.json()).data;
+    return { data };
+  }
 }
