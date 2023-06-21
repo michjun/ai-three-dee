@@ -27,6 +27,7 @@ Please note the following:
 - Use only the provided shape names from the list
 - If the prompt object does not have a physical shape, return "Unrelated"
 - Try to be a little creative, but don't worry too much about it
+- For color, you can add an optional "a" attribute for transparency, from 0 to 255. If not provided, the default is 255.
 `;
 
 const chainOfThoughtPrompt = `
@@ -113,7 +114,7 @@ export default async function (req, res) {
     const { openAI } = getOpenAI();
     const { data } = await openAI.createChatCompletion(
       {
-        model: "gpt-4",
+        model: "gpt-4-0613",
         messages: messages,
         stream: true,
       },

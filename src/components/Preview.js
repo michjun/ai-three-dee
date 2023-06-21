@@ -45,7 +45,7 @@ export default function Preview({
 
   function renderShape(obj, p, unit) {
     if (obj.color) {
-      p.fill(obj.color.r, obj.color.g, obj.color.b);
+      p.fill(obj.color.r, obj.color.g, obj.color.b, obj.color.a || 255);
     } else {
       p.fill(255, 215, 0);
     }
