@@ -93,11 +93,11 @@ export default function ActionBar({
       if (
         ["Cone", "Triangle Pyramid", "Square Pyramid"].includes(shape.shape)
       ) {
-        mesh.rotation.x = Math.PI;
+        mesh.rotation.z = -Math.PI;
       }
-      mesh.rotation.x += -shape.rotation.x;
+      mesh.rotation.x = -shape.rotation.x;
       mesh.rotation.y = -shape.rotation.y;
-      mesh.rotation.z = -shape.rotation.z;
+      mesh.rotation.z += -shape.rotation.z;
       mesh.scale.set(shape.scale.x, shape.scale.y, shape.scale.z);
       // Add to the scene
       scene.add(mesh);
