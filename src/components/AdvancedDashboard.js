@@ -159,6 +159,7 @@ export default function AdvancedDashboard() {
             creation={creation}
             actions={[
               availableActions.refine,
+              availableActions.export,
               availableActions.save,
               availableActions.reload,
             ]}
