@@ -1,6 +1,6 @@
 # AI 3D
 
-Text to 3D experiment using GPT-4, see live version on https://3dgenie.xyz
+Text to 3D experiment using GPT-4 using premitive shapes with rotation / translation / scale, see live version on https://3dgenie.xyz
 
 ## Setup
 
